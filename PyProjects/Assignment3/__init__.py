@@ -74,7 +74,6 @@ def ideal_kernel(shape=(3,3),sigma=1):
 def gauss2dkernel(shape=(3,3),sigmasq=1):
     m,n = [(ss-1.)/2. for ss in shape]
     y,x = np.ogrid[-m:m+1,-n:n+1]
-    print np.exp((x*x)/m + (y*y)/n)/8
     h = np.exp( -((x*x)/m + (y*y)/n) / (2.*sigmasq) )
     h[ h < np.finfo(h.dtype).eps*h.max() ] = 0
     sumh = h.sum()
