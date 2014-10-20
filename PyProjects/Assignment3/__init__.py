@@ -9,6 +9,7 @@ from scipy.spatial.distance import pdist, squareform
 def main():
     args = parseargs()
     imgarr = misc.imread(args.inputimage)
+    
     shape = imgarr.shape
     if args.shape:
         shape = (args.shape,args.shape)
@@ -52,7 +53,6 @@ def center(imagearr):
 
 def idealfilter(dftarr,sigmasq,shape):
     kernel = ideal_kernel(shape=shape,sigma=sigmasq )
-    print kernel
     ret = applykernel(kernel, dftarr)
     return ret
 
@@ -67,24 +67,30 @@ def ideal_kernel(shape=(3,3),sigma=1):
                 g[i][j] = 1
             else:
                 g[i][j] = 0
-    return g/g.sum()
+    gsum = g.sum()
+    if gsum != 0:
+        g /=gsum
+    return g
 
-def gauss2dkernel(shape=(3,3),sigma=1):
+def gauss2dkernel(shape=(3,3),sigmasq=1):
     m,n = [(ss-1.)/2. for ss in shape]
     y,x = np.ogrid[-m:m+1,-n:n+1]
-    h = np.exp( -(x*x + y*y) / (2.*sigma*sigma) )
+    h = np.exp( -(x*x + y*y) / (2.*sigmasq) )
     h[ h < np.finfo(h.dtype).eps*h.max() ] = 0
     sumh = h.sum()
     if sumh != 0:
         h /= sumh
     return h
         
-def butterworthkernel(shape=(3,3),sigma=1):
+def butterworthkernel(shape=(3,3),sigmasq=1):
     m,n = [(ss-1.)/2. for ss in shape]
     y,x = np.ogrid[-m:m+1,-n:n+1]
 # we use n=1 here
-    g = 1. / (1 + (np.sqrt(x *x + y * y) / sigma) ** 2)
-    return g/g.sum()
+    g = 1. / (1 + (np.sqrt(x *x + y * y) / sigmasq) ** 2)
+    gsum = g.sum()
+    if gsum != 0:
+        g /=gsum
+    return g
 
 def applykernel(kernel, arr):
     transformedimg = np.array(arr)
@@ -104,7 +110,7 @@ def applykernel(kernel, arr):
 
 def gaussianfilter(dftarr, sigmasq,shape):
 #     Kernel has size 3x3
-    kernel = gauss2dkernel(shape=shape,sigma=sigmasq )
+    kernel = gauss2dkernel(shape=shape,sigmasq=sigmasq )
     return applykernel(kernel, dftarr)
 
 def butterworthfilter(dftarr, sigmasq,shape):
