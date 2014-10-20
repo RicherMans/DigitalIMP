@@ -5,7 +5,7 @@ from scipy import misc
 def main():
     args=parseArgs()
     inputimage = misc.imread(args.inputimage)
-    mask = np.array([[0,-1,0],[-1,4+args.a,-1],[0,-1,0]])
+    mask = np.array([[-1,-1,-1],[-1,9*args.a-1,-1],[-1,-1,-1]])
     outputimage = transform(inputimage,mask)
     writeimage(outputimage,args.o)
 
@@ -14,6 +14,7 @@ def writeimage(binaryimage,outpath):
 
 def transform(arr,mask):
     transformedimg = np.array(arr)
+    abssum = len(mask) * len(mask[0])
     for i in range(1,len(arr)-1):
         for j in range(1,len(arr[0])-1):
             weightedavg = 0
@@ -22,7 +23,7 @@ def transform(arr,mask):
                     weightedavg += transformedimg[i+(p-1)][j+(q-1)] * mask[p][q]
             if weightedavg<0:
                 weightedavg = 0
-            transformedimg[i][j] = weightedavg
+            transformedimg[i][j] = weightedavg/abssum
     return transformedimg
 
 def parseArgs():
