@@ -12,3 +12,7 @@ It offers quite many parameters:
 One needs to note that if the ration between sigma and the shape is too large, the output image will be the input one.
 This is due to calculation of the mask, where a e.g. large sigma for a small mask will lead to a large normalizing factor, which will either uniform
 all values (gaussian and butterworth) or remove any other values than the center one ( ideal).
+
+The resulting images are labelled as:
+[METHOD] [PARAMETER]
+so : gauss_500sig means that this picture was filtered using a parameter of 500 for sigma
