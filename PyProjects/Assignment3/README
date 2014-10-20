@@ -1,0 +1,14 @@
+To use this program, simply execute :
+
+python __init__.py [inputfile]
+
+It offers quite many parameters:
+
+-o Outputs the processed file into the given path. Note that no directories will be generated.
+-s sets the size for the shape of the mask which will be used. The used mask will always be square
+-k sets the kernel type, 'gaussian','butterworth','ideal' are the only parameters, default is gaussian
+-sig the sigma / cutoff parameter for the gaussian/ideal/butterworth filters
+
+One needs to note that if the ration between sigma and the shape is too large, the output image will be the input one.
+This is due to calculation of the mask, where a e.g. large sigma for a small mask will lead to a large normalizing factor, which will either uniform
+all values (gaussian and butterworth) or remove any other values than the center one ( ideal).

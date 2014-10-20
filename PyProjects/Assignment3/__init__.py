@@ -9,7 +9,6 @@ from scipy.spatial.distance import pdist, squareform
 def main():
     args = parseargs()
     imgarr = misc.imread(args.inputimage)
-    
     shape = imgarr.shape
     if args.shape:
         shape = (args.shape,args.shape)
@@ -75,7 +74,8 @@ def ideal_kernel(shape=(3,3),sigma=1):
 def gauss2dkernel(shape=(3,3),sigmasq=1):
     m,n = [(ss-1.)/2. for ss in shape]
     y,x = np.ogrid[-m:m+1,-n:n+1]
-    h = np.exp( -(x*x + y*y) / (2.*sigmasq) )
+    print np.exp((x*x)/m + (y*y)/n)/8
+    h = np.exp( -((x*x)/m + (y*y)/n) / (2.*sigmasq) )
     h[ h < np.finfo(h.dtype).eps*h.max() ] = 0
     sumh = h.sum()
     if sumh != 0:
@@ -95,13 +95,14 @@ def butterworthkernel(shape=(3,3),sigmasq=1):
 def applykernel(kernel, arr):
     transformedimg = np.array(arr)
     x, y = kernel.shape
+    print kernel
     offset = x / 2
     for i in range(offset, len(arr) - offset):
         for j in range(offset, len(arr[0]) - offset):
             weightedavg = 0
             for p in range(len(kernel)):
                 for q in range(len(kernel)):
-                    weightedavg += transformedimg[i + (p - offset)][j + (q - offset)] * kernel[p][q]
+                    weightedavg += arr[i + (p - offset)][j + (q - offset)] * kernel[p][q]
             if weightedavg < 0:
                 weightedavg = 0
             transformedimg[i][j] = weightedavg
