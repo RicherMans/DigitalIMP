@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from scipy import misc, ndimage
+from scipy import misc
 import cmath
 import numpy as np
 import math
@@ -13,7 +13,7 @@ def main():
     shape = imgarr.shape
     if args.shape:
         shape = (args.shape, args.shape)
-    transformedimg = transform(imgarr, args.kernel, shape,args.sigma)
+    transformedimg = transform(imgarr, args.kernel, shape)
     if(args.o):
         misc.imsave(args.o, transformedimg)
 
@@ -26,17 +26,17 @@ def parseargs():
     parser.add_argument('-sig', '--sigma', type=float, help='Sigma / Cutoff frequency')
     return parser.parse_args()
 
-def transform(imagearray, kernel, shape,sigma):
+def transform(imagearray, kernel, shape):
     dftrans = np.fft.fft2(imagearray)
     filt = filters[kernel]
-    filteredimg = filt(dftrans, sigma, shape)
+    filteredimg = filt(dftrans, 2, shape)
     restoredimg = np.fft.ifft2(filteredimg)
     realimg = extractReal(restoredimg)
+    
     return realimg
 
 def extractReal(img):
-    realpart = np.array([[real(img[j][i]) for i in range(len(img[0]))] for j in range(len(img))])
-    return realpart
+    return np.array([[real(img[i][j]) for i in range(len(img[0]))] for j in range(len(img))])
 
 def evenodd(x, y):
     if (x + y) % 2 == 0:
@@ -76,7 +76,8 @@ def ideal_kernel(shape=(3, 3), sigma=1):
 def gauss2dkernel(shape=(3, 3), sigmasq=1):
     m, n = [(ss - 1.) / 2. for ss in shape]
     y, x = np.ogrid[-m:m + 1, -n:n + 1]
-    h = np.exp( (-1 * (x * x) + (y * y)) / (2.*sigmasq ** 2))
+    h = np.exp(-1*np.sqrt((x * x)  + (y * y) ) / (2.*sigmasq **2))
+#     h[ h < np.finfo(h.dtype).eps * h.max() ] = 0
     sumh = h.sum()
     if sumh != 0:
         h /= sumh
@@ -86,19 +87,36 @@ def butterworthkernel(shape=(3, 3), sigmasq=1):
     m, n = [(ss - 1.) / 2. for ss in shape]
     y, x = np.ogrid[-m:m + 1, -n:n + 1]
 # we use n=1 here
-    g = 1. / (1 + (np.sqrt(x * x + y * y) / sigmasq) ** 2)
+    g = 1. / (1 + (np.sqrt(x ** 2 + y ** 2) / sigmasq) ** 2)
     gsum = g.sum()
     if gsum != 0:
         g /= gsum
     return g
 
 def applykernel(kernel, arr):
-    arr *= kernel
-    return arr
+    transformedimg = np.copy(arr)
+#     x, y = kernel.shape
+#     offset = x / 2
+    for i in range(len(arr)):
+        for j in range(len(arr[0])):
+            transformedimg[i][j] *= kernel[i][j]
+#     for i in range(offset, len(arr) - offset):
+#         for j in range(offset, len(arr[0]) - offset):
+#             transformedimg[i][j] = transformedimg[i][j] * kernel[i][j]
+#             weightedavg = 0
+#             for p in range(len(kernel)):
+#                 for q in range(len(kernel)):
+#                         weightedavg += transformedimg[i + (p - offset)][j + (q - offset)] * kernel[p][q]
+#             if weightedavg < 0:
+#                 weightedavg = 0
+#             transformedimg[i][j] = weightedavg
+    return transformedimg
+
 
 def gaussianfilter(dftarr, sigmasq, shape):
 #     Kernel has size 3x3
     kernel = gauss2dkernel(shape=shape, sigmasq=sigmasq)
+    print kernel
     return applykernel(kernel, dftarr)
 
 def butterworthfilter(dftarr, sigmasq, shape):
