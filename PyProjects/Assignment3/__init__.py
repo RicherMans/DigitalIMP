@@ -127,7 +127,8 @@ def butterworthfilter(dftarr, sigmasq, shape):
 filters = {
         'gaussian':gaussianfilter,
         'ideal' :idealfilter,
-        'butterworth':butterworthfilter
+        'butterworth':butterworthfilter,
+        ''
          }
     
 
