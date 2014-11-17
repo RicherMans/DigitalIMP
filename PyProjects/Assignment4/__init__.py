@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from scipy import misc
+from scipy import misc, random
 import cmath
 import numpy as np
 import math
@@ -16,9 +16,10 @@ def main():
     args = parseargs()
     imagearr = misc.imread(args.inputimage)
     noisedimg = addNoise(args.noise, imagearr)
-    alphatrimmedMeanFilter(noisedimg, 2)
+    writeImg(noisedimg, 'uniform', 'orig')
+#     alphatrimmedMeanFilter(noisedimg, 2)
 #     writeImg(noisedimg, args.noise, 'OriginalNoise')
-#     filterImgWriteOut(args,noisedimg)
+    filterImgWriteOut(args,noisedimg)
         
 
 def filterImgWriteOut(args,img):
@@ -66,13 +67,13 @@ def addNoise(noise,imagearr):
     if noise == 'gaussian':
         curnoise= gaussiannoise(255/2, 255/8, imagearr)
     elif noise == 'uniform':
-        curnoise = uniformnoise(0, 255)
+        curnoise = uniformnoise(imagearr,0, 255)
     noisedimg = imagearr + curnoise
     normalize(noisedimg)
     return noisedimg
 
-def uniformnoise(low=0,high=1):
-    return np.random.uniform(low/255,high/255)
+def uniformnoise(data,low=0,high=1):
+    return np.random.uniform(low,high,size=data.shape)
 
 def gaussiannoise(mean,var,data):
     return np.random.normal(mean,var,data.shape)
