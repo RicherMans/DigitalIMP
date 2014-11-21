@@ -4,119 +4,100 @@ import cmath
 import numpy as np
 import math
 from matplotlib import pyplot as plt
-from scipy.spatial.distance import pdist, squareform
-from numpy import real
+from numpy import real, convolve
+import scipy
 
 def main():
     args = parseargs()
     imgarr = misc.imread(args.inputimage)
     shape = imgarr.shape
-    if args.shape:
-        shape = (args.shape, args.shape)
-    transformedimg = transform(imgarr, args.kernel, shape)
+    transformedimg = transform(imgarr, args.kernel, shape ,args.sigma)
+#     print transformedimg
+#     print transformedimg[0][0]
     if(args.o):
         misc.imsave(args.o, transformedimg)
-
+        
+        
 def parseargs():
     parser = ArgumentParser()
     parser.add_argument('inputimage', help='The inputted image')
     parser.add_argument('-o', type=str, help='Output image path')
     parser.add_argument('-k', '--kernel', choices=filters.keys(), default='gaussian', help='The kernel, which is going to be used')
-    parser.add_argument('-s', '--shape', type=int, help='Sqare shape of the kernel, default its the picture size')
     parser.add_argument('-sig', '--sigma', type=float, help='Sigma / Cutoff frequency')
     return parser.parse_args()
 
-def transform(imagearray, kernel, shape):
+def transform(imagearray, kernel, shape,sigma):
+    imagearray=center(imagearray)
     dftrans = np.fft.fft2(imagearray)
     filt = filters[kernel]
-    filteredimg = filt(dftrans, 2, shape)
+    filteredimg = filt(dftrans,sigma**2 , shape)
     restoredimg = np.fft.ifft2(filteredimg)
     realimg = extractReal(restoredimg)
-    
-    return realimg
+    return center(realimg)
+#     return realimg
 
 def extractReal(img):
-    return np.array([[real(img[i][j]) for i in range(len(img[0]))] for j in range(len(img))])
-
-def evenodd(x, y):
-    if (x + y) % 2 == 0:
-        return 1
-    else:
-        return -1
+    return np.array([[img[j][i].real for i in range(len(img[0]))] for j in range(len(img))])
 
 # Keep in mind that usually the datatype is uint8 so non negtaive values
 def center(imagearr):
-    copied = np.array(imagearr, dtype=int)
-    for i in range(len(imagearr)):
-        for j in range(len(imagearr[0])):
-            copied[i][j] = imagearr[i][j] * evenodd(i, j)
-    return copied
+    m,n = imagearr.shape
+    x,y = np.ogrid[0:m,0:n]
+    return imagearr * ((-1)**(x+y))
 
 def idealfilter(dftarr, sigmasq, shape):
     kernel = ideal_kernel(shape=shape, sigma=sigmasq)
-    ret = applykernel(kernel, dftarr)
-    return ret
+    return applykernel(kernel,dftarr)
 
 
-def ideal_kernel(shape=(3, 3), sigma=1):
-    m, n = [(ss - 1.) / 2. for ss in shape]
-    y, x = np.ogrid[-m:m + 1, -n:n + 1]
-    g = np.sqrt(x * x + y * y)
-    for i in range(len(g[0])):
-        for j in range(len(g)):
-            if g[i][j] <= sigma:
-                g[i][j] = 1
+def ideal_kernel(shape, sigma):
+    xx,yy =shape
+#     m, n = [(ss -1) / 2. for ss in shape]
+    x, y = np.mgrid[0:xx, 0:yy]
+    d = eucl_dist(x, y, len(x), len(y))
+    for i in range(len(d[0])):
+        for j in range(len(d)):
+            if d[i][j] <= sigma:
+                d[i][j] = 1
             else:
-                g[i][j] = 0
-    gsum = g.sum()
+                d[i][j] = 0
+    gsum = d.sum()
     if gsum != 0:
-        g /= gsum
-    return g
+        d /= gsum
+    return d
 
-def gauss2dkernel(shape=(3, 3), sigmasq=1):
-    m, n = [(ss - 1.) / 2. for ss in shape]
-    y, x = np.ogrid[-m:m + 1, -n:n + 1]
-    h = np.exp(-1*np.sqrt((x * x)  + (y * y) ) / (2.*sigmasq **2))
+def eucl_dist(i,j,M,N):
+    return np.sqrt((i-(M/2))**2+(j-(N/2))**2)
+
+def gauss2dkernel(shape, sigmasq):
+    xx,yy =shape
+#     m, n = [(ss -1) / 2. for ss in shape]
+    x, y = np.mgrid[0:xx, 0:yy]
+    d = eucl_dist(x, y, len(x), len(y))
+    h = np.exp(-(d**2/(2.*sigmasq)))
 #     h[ h < np.finfo(h.dtype).eps * h.max() ] = 0
     sumh = h.sum()
     if sumh != 0:
         h /= sumh
     return h
         
-def butterworthkernel(shape=(3, 3), sigmasq=1):
-    m, n = [(ss - 1.) / 2. for ss in shape]
-    y, x = np.ogrid[-m:m + 1, -n:n + 1]
+def butterworthkernel(shape, sigmasq):
+    xx,yy =shape
+    x, y = np.mgrid[0:xx, 0:yy]
+    d = eucl_dist(x, y, len(x), len(y))
 # we use n=1 here
-    g = 1. / (1 + (np.sqrt(x ** 2 + y ** 2) / sigmasq) ** 2)
+    g = 1. / (1 + (np.sqrt(d**2) / sigmasq) ** 2)
     gsum = g.sum()
     if gsum != 0:
         g /= gsum
     return g
 
 def applykernel(kernel, arr):
-    transformedimg = np.copy(arr)
-#     x, y = kernel.shape
-#     offset = x / 2
-    for i in range(len(arr)):
-        for j in range(len(arr[0])):
-            transformedimg[i][j] *= kernel[i][j]
-#     for i in range(offset, len(arr) - offset):
-#         for j in range(offset, len(arr[0]) - offset):
-#             transformedimg[i][j] = transformedimg[i][j] * kernel[i][j]
-#             weightedavg = 0
-#             for p in range(len(kernel)):
-#                 for q in range(len(kernel)):
-#                         weightedavg += transformedimg[i + (p - offset)][j + (q - offset)] * kernel[p][q]
-#             if weightedavg < 0:
-#                 weightedavg = 0
-#             transformedimg[i][j] = weightedavg
-    return transformedimg
+    return arr*kernel
 
 
-def gaussianfilter(dftarr, sigmasq, shape):
-#     Kernel has size 3x3
+def blurringfilter(dftarr, sigmasq, shape):
     kernel = gauss2dkernel(shape=shape, sigmasq=sigmasq)
-    print kernel
     return applykernel(kernel, dftarr)
 
 def butterworthfilter(dftarr, sigmasq, shape):
@@ -125,10 +106,9 @@ def butterworthfilter(dftarr, sigmasq, shape):
 
 
 filters = {
-        'gaussian':gaussianfilter,
+        'gaussian':blurringfilter,
         'ideal' :idealfilter,
-        'butterworth':butterworthfilter,
-        ''
+        'butterworth':butterworthfilter
          }
     
 

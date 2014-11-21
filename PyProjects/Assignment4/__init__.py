@@ -15,7 +15,7 @@ import os
 def main():
     args = parseargs()
     imagearr = misc.imread(args.inputimage)
-    noisedimg = addNoise(args.noise, imagearr)
+    noisedimg = transform(args.noise, imagearr)
     writeImg(noisedimg, 'uniform', 'orig')
 #     alphatrimmedMeanFilter(noisedimg, 2)
 #     writeImg(noisedimg, args.noise, 'OriginalNoise')
@@ -63,7 +63,7 @@ def writeImg(img,noisetype,filtertype):
     misc.imsave(noisetype+'_'+filtertype+'.tif', img)    
     print "Wrote %s "%(noisetype+'_'+filtertype+'.tif')
     
-def addNoise(noise,imagearr):
+def transform(noise,imagearr):
     if noise == 'gaussian':
         curnoise= gaussiannoise(255/2, 255/8, imagearr)
     elif noise == 'uniform':
