@@ -50,16 +50,20 @@ def blurringkernel(shape,T,a,b):
     xx,yy = shape
     x, y = np.mgrid[0.:xx, 0.:yy]
     x[0,0]=.1
+#     z = np.zeros(shape)
+#     for i in range(xx):
+#         if i != xx/2:
+#             z[yy-i-1,i] = 1
+#     return z+ np.eye(xx) / (xx + xx-1)
 #     d[((len(x))/2)-1][(len(y)/2)-1] = .1111
-#     return (T/(np.pi*((a+b)*d)))*np.sin(np.pi*(d*(a+b))) * np.exp(-1j*np.pi*((a+b)*d))
     return (T/(np.pi*(x*a+y*b))) * np.sin(np.pi*(x*a+y*b)) * np.exp(-1j*np.pi*(x*a+y*b))
 
 def blurringfilter(dftarr, kernel):
-    x = []
-    for i in kernel:
-        x.append(max(i))
-    print max(x)
-    print kernel[0][0]
+#     x = []
+#     for i in kernel:
+#         x.append(max(i))
+#     print max(x)
+#     print kernel[0][0]
 #     print kernel[len(kernel)/2][len(kernel)/2]
     return applykernel(dftarr,kernel)
 
