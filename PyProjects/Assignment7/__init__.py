@@ -7,6 +7,9 @@ from scipy.fftpack import dct
 import cmath
 import numpy as np
 from matplotlib import pyplot
+import scipy
+from scipy.linalg import block_diag
+from numpy import vstack
 
 jpegstd = np.array([[16, 11, 10, 16, 24, 40, 51, 61],
            [12, 12, 14, 19, 26, 58, 60, 55],
@@ -57,13 +60,61 @@ thresholdmask1 = np.array([
         [0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0]
         ])
-
-haar = []
+h0 = np.array([1/np.sqrt(2),1/np.sqrt(2)])
+h1 = np.array([1/np.sqrt(2),-1/np.sqrt(2)])
+g0_daub = np.array([0.23037781,0.71484657,0.63088076,-0.02798376,-0.18703481,0.03084138,0.03288301,-0.0105940])
+g0_sym = np.array([0.0322,-0.0126,-0.0992,0.2979,0.8037,0.4976,-0.0296,-0.0758])
 mats = {'jpeg':jpegstd, 'zonal':zonal,'threshold':thresholdmask,'threshold1':thresholdmask1,'zonalbest':zonal_best}
-wavelets = {'haar':haar}
+wavelets = {'haar':'a'}
+
+
+def encodewavelet(inputimage,waveletkernel,level):
+    b = np.dot(inputimage,waveletkernel)
+    for _ in range(level):
+        b = np.dot(b.T,waveletkernel)
+    return b
+
+def haarkernel(img):
+    m,_ = img.shape
+    upperhaar=[]
+    lowerhaar = []
+    for i in range(0,m,2):
+        q = np.zeros(m)
+        p = np.zeros(m)
+        q[i:i+len(h0)] = h0
+        p[i:i+len(h1)] = h1
+        upperhaar.append(q)
+        lowerhaar.append(p)
+    return np.vstack((upperhaar,lowerhaar)).T
+
+def daubechieswavelet(inputimage,waveletkernel):
+    m,_ = inputimage.shape
+    upperhalf = []
+    lowerhalf = []
+    for i in range(0,m,len(g0_daub)):
+        q = np.zeros(m)
+        p = np.zeros(m)
+        q[i:i+len(g0_daub)] =g0_daub
+#         Reverse
+        h0 = q[::-1]
+        g1 = -1*h0[::2]
+        for qq in range(h0):
+            if qq %2 == 1:
+                h0[qq] *= -1
+#         p[i:i+len(g0_daub)] =
+        
 
 def main():
     args = parseArgs()
+    if args.wavelet:
+        kernel = haarkernel(args.inputimage)
+        kernel = daubechieswavelet(args.inputimage,None)
+        discrete_haar = encodewavelet(args.inputimage,kernel,3)
+#         discrete_haar = discreteHaarWaveletTransform(args.inputimage)
+        misc.imsave(args.o +'_haar.tif',discrete_haar)
+#         print (np.eye(m/2, n) * h0).shape
+#         upperhaar = np.vstack((np.eye(m/2, n) * h0),(np.eye(m/2, n) * h1))
+#         print upperhaar
     encodedimgs = encode(args.inputimage,mats[args.quantmattype])
     decodedimg = decode(encodedimgs,args.inputimage.shape[0])
     if args.o:
@@ -72,13 +123,8 @@ def main():
     if args.o:
         misc.imsave(args.o+'_diff.tif',difference)
 
+
 def parseArgs():
-#     x=np.zeros(shape=(8,8))
-#     p = 0
-#     for i in reversed(xrange(len(x))):
-#         for j in range(i-p):
-#             x[len(x)-i-1,j] = 1
-#     print x
     parser = argparse.ArgumentParser()
     parser.add_argument('inputimage', type=misc.imread)
     parser.add_argument('-quantmattype', choices=mats, default=mats.values()[0])
