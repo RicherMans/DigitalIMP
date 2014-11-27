@@ -60,28 +60,51 @@ thresholdmask1 = np.array([
         [0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0]
         ])
-h0 = np.array([1 / np.sqrt(2), 1 / np.sqrt(2)])
-h1 = np.array([1 / np.sqrt(2), -1 / np.sqrt(2)])
+haar_h0 = np.array([1 / np.sqrt(2), 1 / np.sqrt(2)])
+haar_h1 = np.array([1 / np.sqrt(2), -1 / np.sqrt(2)])
 g0_daub = np.array([0.23037781, 0.71484657, 0.63088076, -0.02798376, -0.18703481, 0.03084138, 0.03288301, -0.0105940])
 g0_sym = np.array([0.0322, -0.0126, -0.0992, 0.2979, 0.8037, 0.4976, -0.0296, -0.0758])
 mats = {'jpeg':jpegstd, 'zonal':zonal, 'threshold':thresholdmask, 'threshold1':thresholdmask1, 'zonalbest':zonal_best}
 
+def splitwise(inputimage,waveletkernel,wise='row'):
+    ret = np.zeros((inputimage.shape))
+    h0,h1 = waveletkernel
+    step = len(h0)
+    m, _ = inputimage.shape
+    if  wise == 'col':
+        for i in range(0, (len(inputimage[0]) / step)):
+            col = inputimage[:,i]
+            ret[i * step:(i * step) + step][i] = np.inner(col[i * step:(i * step) + step], h0)
+            print i
+            print (m / 2) + i - 1
+            ret[(i * step):(i * step) + step][(m / 2) + i - 1] = np.inner(col[i * step:(i * step) + step], h1)
+        return ret
+    if wise == 'row':
+        for i in range(0, (len(inputimage) / step)):
+            row = inputimage[i]
+            ret[i][i * step:(i * step) + step] = np.inner(row[i * step:(i * step) + step], h0)
+            ret[(m / 2) + i - 1][(i * step):(i * step) + step] = np.inner(row[i * step:(i * step) + step], h1)
+        return ret
+
 
 def encodewavelet(inputimage, waveletkernel, level):
-    ret = inputimage[:]
-    for _ in range(level):
-        ret = np.dot(waveletkernel.T, np.dot(ret, waveletkernel))
+    q = ('row','col')
+    ret = np.copy(inputimage)
+    for i in range(level):
+        for qq in q:
+            ret = splitwise(ret, waveletkernel, qq)
     return ret
 
 def decodewavelet(inputimage, waveletkernel, level):
     ret = inputimage[:]
-    for _ in range(level):
-        ret = np.dot(waveletkernel, np.dot(ret, waveletkernel.T))
+#     for _ in range(level):
+#         ret = np.dot(waveletkernel, np.dot(ret, waveletkernel.T))
     return ret
 
 def haarkernel(img):
     m, _ = img.shape
-    return (np.vstack(((np.kron(np.eye(m / 2), h0)), (np.kron(np.eye(m / 2), h1)))).T)
+    return (haar_h0, haar_h1)
+#     return (np.vstack(((np.kron(np.eye(m / 2), h0)), (np.kron(np.eye(m / 2), h1)))).T)
 
 '''
 Returns the forward and the backward wavelet
@@ -89,11 +112,19 @@ Returns the forward and the backward wavelet
 def daubechieskernel(inputimage):
     m, _ = inputimage.shape
     h0 = g0_daub[::-1]
+    g1 = [h0[i] * -1.**i for i in range(len(g0_daub))]
+    h1 = g1[::-1]
+    return ((h0, h1), (g0_daub, g1))
+#     fwd = np.vstack((np.kron(np.eye(m / 2), h0), np.kron(np.eye(m / 2), h1))).T
+#     bwd = np.vstack((np.kron(np.eye(m / 2), g0_daub), np.kron(np.eye(m / 2), g1))).T
+#     return (fwd, bwd)
+
+def symletkernel(inputimage):
+    m, _ = inputimage.shape
+    h0 = g0_sym[::-1]
     g1 = [h0[i] * -1. for i in range(len(g0_daub))]
-    h1 = g1[::-1] 
-    fwd = np.vstack((np.kron(np.eye(m / 2), h0), np.kron(np.eye(m / 2), h1)))
-    bwd = np.vstack((np.kron(np.eye(m / 2), g0_daub), np.kron(np.eye(m / 2), g1)))
-    return (fwd, bwd)
+    h1 = g1[::-1]
+    fwd = np.vstack((np.kron(np.eye(m / 2),)))
 
 wavelets = {'haar':haarkernel, 'daub':daubechieskernel}
 def main():
@@ -110,13 +141,15 @@ def main():
             bwd = kernel[1]
 #         kernel = daubechieskernel(args.inputimage,None)
         encoded = encodewavelet(args.inputimage, fwd, 3)
+#         Removes the less important compnents, yet makes the picture quality worse
+        encoded[encoded < args.threshold] = 0
+#         Decode the thresholded image, will be in worse quality, but smaller
+        decoded = decodewavelet(encoded, bwd, 3)
+        difference = args.inputimage - decoded
         if args.o:
             misc.imsave(args.o + '_' + args.wavelet + '_encoded.tif', encoded)
-#         Removes the less important compnents, yet makes the picture quality worse        
-        encoded[encoded < args.threshold] = 0
-        decoded = decodewavelet(encoded, bwd, 3)
-        if args.o:
             misc.imsave(args.o + '_' + args.wavelet + '_reconstructed.tif', decoded)
+            misc.imsave(args.o + '_' + args.wavelet + '_diff.tif', difference)
     if args.quantmattype:
         encodedimgs = encode(args.inputimage, mats[args.quantmattype])
         decodedimg = decode(encodedimgs, args.inputimage.shape[0])
@@ -132,7 +165,7 @@ def parseArgs():
     parser.add_argument('inputimage', type=misc.imread)
     parser.add_argument('-quantmattype', choices=mats)
     parser.add_argument('-wavelet', choices=wavelets)
-    parser.add_argument('-t', '--threshold', help='Tht Threshold for the wavelet transforms, all values in the encoded wavelet will be truncated below threshold',action='store_true')
+    parser.add_argument('-t', '--threshold', help='Tht Threshold for the wavelet transforms, all values in the encoded wavelet will be truncated below threshold', type=int)
     parser.add_argument('-o', type=str, help='Outputfile')
     return parser.parse_args()
 
