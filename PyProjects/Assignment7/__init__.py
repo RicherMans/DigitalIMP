@@ -77,46 +77,6 @@ def chunks(l, n):
     return [l[i:i + n] for i in range(0, len(l), n)]
 
 
-def computeWavelet(inputimage, waveletkernel, level):
-
-    ret = np.copy(inputimage)
-    h0, h1 = waveletkernel
-    step = len(h0)
-    m, _ = inputimage.shape
-    w = m
-    for _ in range(level):
-        w /= 2
-        for i in range(0, w):
-            #             chunksup = np.array(chunks(ret[i, :2 * w], step))
-            #             chunkslow = np.array(chunks(ret[w + i, :2 * w], step))
-            #             print np.convolve(ret[i, :2 * w],h0,'same').shape
-            ret[i, :w] = np.convolve(ret[i, : w], h0, 'same')
-            ret[w + i, :w] = np.convolve(ret[w + i, : w], h1, 'same')
-#             newrowup = []
-#             for chunk in chunksup:
-#                 	newrowup.append(np.inner(chunk, h0))
-#             newrowlow = []
-#             for chunk in chunkslow:
-#                 newrowlow.append(np.inner(chunk, h1))
-#             ret[i, :w] = np.array(newrowup).reshape(w)
-#             ret[w + i, :w] = np.array(newrowlow).reshape(w)
-        for i in range(0, w):
-            ret[:w, i] = np.convolve(ret[:w, i], h0, 'same')
-            ret[:w, w + i] = np.convolve(ret[:w, w + i], h0, 'same')
-#             chunksup = np.array(chunks(ret[:2 * w, i], step))
-#             chunkslow = np.array(chunks(ret[:2 * w, w + i], step))
-#             newcolup = []
-#             for chunk in chunksup:
-#                 newcolup.append(np.inner(chunk, h0))
-#             newrowlow = []
-#             for chunk in chunkslow:
-#                 newrowlow.append(np.inner(chunk, h1))
-#             ret[:w, i] = np.array(newcolup).reshape(w)
-#             ret[:w, w + i] = np.array(newrowlow).reshape(w)
-    return ret
-#     if wise == 'row':
-
-
 def encodewavelet(inputimage, waveletkernel, level):
     ret = np.copy(inputimage)
     for _ in range(level):
@@ -127,70 +87,60 @@ def encodewavelet(inputimage, waveletkernel, level):
 
 def decodewavelet(inputimage, waveletkernel, level):
     ret = inputimage[:]
-#     for _ in range(level):
-#         ret = np.dot(waveletkernel, np.dot(ret, waveletkernel.T))
+    for _ in range(level):
+        ret = np.dot(waveletkernel, np.dot(ret, waveletkernel.T))
     return ret
 
 
 def haarkernel(img):
     m, _ = img.shape
-
     return (np.vstack(((np.kron(np.eye(m / 2), haar_h0)), (np.kron(np.eye(m / 2), haar_h1)))).T)
-    return (haar_h0, haar_h1)
-
-'''
-Returns the forward and the backward wavelet
-'''
 
 
 def daubechieskernel(inputimage):
     m, _ = inputimage.shape
     h0 = g0_daub[::-1]
-    g1 = [h0[i] * -1. ** i for i in range(len(g0_daub))]
+    g1 = [h0[i] * np.power(- 1., i) for i in range(len(g0_daub))]
     h1 = g1[::-1]
     # return ((h0, h1), (g0_daub, g1))
     fwd = np.zeros((inputimage.shape))
     # We initizlize the matrix as having a stacked diagonal
-    for i in range(0, (m / 2) - 2, 2):
-        fwd[i, 2 * i:2 * i + 8] = h0
-        fwd[(m / 2) + 1, 2 * i:2 * i + 8] = h1
-    print fwd[254]
-    bwd = None
-    # fwd = np.vstack((np.kron(np.eye(m / 2), h0), np.kron(np.eye(m / 2), h1))).T
-    # bwd = np.vstack(
-    #     (np.kron(np.eye(m / 2), g0_daub), np.kron(np.eye(m / 2), g1))).T
-    return (fwd, bwd)
+    # Using two different submatrices, where the lower and the upper part are
+    # (h0, h1) respectively
+    for i in range(0, m / 2):
+        for j in range(len(h0)):
+            fwd[i, (2 * i + j) % m] = h0[j]
+            fwd[(m / 2) + i, (2 * i + j) % m] = h1[j]
+    return fwd.T
 
 
 def symletkernel(inputimage):
     m, _ = inputimage.shape
-    h0 = g0_sym[::-1]
-    g1 = [h0[i] * -1. for i in range(len(g0_daub))]
+    h0 = g0_sym[:: -1]
+    g1 = [h0[i] * np.power(- 1., i) for i in range(len(g0_daub))]
     h1 = g1[::-1]
-    fwd = np.vstack((np.kron(np.eye(m / 2),)))
 
-wavelets = {'haar': haarkernel, 'daub': daubechieskernel}
+    fwd = np.zeros((inputimage.shape))
+    for i in range(0, m / 2):
+        for j in range(len(h0)):
+            fwd[i, (2 * i + j) % m] = h0[j]
+            fwd[(m / 2) + i, (2 * i + j) % m] = h1[j]
+    return fwd.T
+
+wavelets = {'haar': haarkernel, 'daub': daubechieskernel,
+            'sym': symletkernel}
 
 
 def main():
     args = parseArgs()
     if args.wavelet:
         kernel = wavelets[args.wavelet](args.inputimage)
-#      if we return a tuple, we have two different functions for forward
-#     transform and backward transform
-        if args.wavelet == 'haar':
-            fwd = kernel
-            bwd = kernel
-        else:
-            fwd = kernel[0]
-            bwd = kernel[1]
-#         kernel = daubechieskernel(args.inputimage,None)
-        encoded = encodewavelet(args.inputimage, fwd, 3)
+        encoded = encodewavelet(args.inputimage, kernel, 3)
 # Removes the less important compnents, yet makes the picture quality
 # worse
         encoded[encoded < args.threshold] = 0
 #         Decode the thresholded image, will be in worse quality, but smaller
-        decoded = decodewavelet(encoded, bwd, 3)
+        decoded = decodewavelet(encoded, kernel, 3)
         difference = args.inputimage - decoded
         if args.o:
             misc.imsave(args.o + '_' + args.wavelet + '_encoded.tif', encoded)
@@ -268,7 +218,7 @@ def idct2(data):
 def constructsubimages(img, size=8):
     for i in range(0, len(img), size):
         for j in range(0, len(img[0]), size):
-            yield img[i:i + size, j:j + size]
+            yield img[i: i + size, j: j + size]
 
 
 def forwardtransform(subimages):
