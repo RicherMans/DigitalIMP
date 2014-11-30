@@ -69,12 +69,12 @@ def ideal_kernel(shape, sigma):
 def eucl_dist(i,j,M,N):
     return np.sqrt((i-(M/2))**2+(j-(N/2))**2)
 
-def gauss2dkernel(shape, sigmasq):
+def gauss2dkernel(shape, sigma):
     xx,yy =shape
 #     m, n = [(ss -1) / 2. for ss in shape]
     x, y = np.mgrid[0:xx, 0:yy]
     d = eucl_dist(x, y, len(x), len(y))
-    h = np.exp(-(d**2/(2.*sigmasq)))
+    h = np.exp(-(d**2/(2.*sigma)))
 #     h[ h < np.finfo(h.dtype).eps * h.max() ] = 0
     sumh = h.sum()
     if sumh != 0:
@@ -97,7 +97,7 @@ def applykernel(kernel, arr):
 
 
 def blurringfilter(dftarr, sigmasq, shape):
-    kernel = gauss2dkernel(shape=shape, sigmasq=sigmasq)
+    kernel = gauss2dkernel(shape=shape, sigma=sigmasq)
     return applykernel(kernel, dftarr)
 
 def butterworthfilter(dftarr, sigmasq, shape):

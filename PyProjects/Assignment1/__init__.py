@@ -40,7 +40,7 @@ def equalize(histogram):
     index_hist = [ int(((GRAYLEVEL - 1) * cul_dist[i])) for i in range(histlength)]
     return index_hist
 
-def genHistogram(picture):
+def separateOtsu(picture):
     hist_count = np.array([i for i in range(GRAYLEVEL)])
     for x in range(len(picture)):
         for y in range(len(picture[0])):
@@ -49,7 +49,7 @@ def genHistogram(picture):
     return hist_count
 
 def transform(picture):
-    histogram_counts = genHistogram(picture)
+    histogram_counts = separateOtsu(picture)
     equalize_indexes = equalize(histogram_counts)
     transformedpicture = np.zeros(picture.shape)
     for x in range(len(picture)):
