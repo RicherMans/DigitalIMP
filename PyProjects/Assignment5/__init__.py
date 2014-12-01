@@ -48,15 +48,10 @@ def normalize(arr):
 
 def blurringkernel(shape,T,a,b):
     xx,yy = shape
-    x, y = np.mgrid[0.:xx, 0.:yy]
-    x[0,0]=.1
-#     z = np.zeros(shape)
-#     for i in range(xx):
-#         if i != xx/2:
-#             z[yy-i-1,i] = 1
-#     return z+ np.eye(xx) / (xx + xx-1)
-#     d[((len(x))/2)-1][(len(y)/2)-1] = .1111
-    return (T/(np.pi*(x*a+y*b))) * np.sin(np.pi*(x*a+y*b)) * np.exp(-1j*np.pi*(x*a+y*b))
+    x, y = np.mgrid[(-xx/2):(xx/2), (-yy/2):yy/2]
+    q = (np.pi*(x*a+y*b))
+    q[np.where(q==0)]=T
+    return (T/q) * np.sin(q) * np.exp(-1j*q)
 
 def blurringfilter(dftarr, kernel):
 #     x = []
@@ -81,8 +76,8 @@ def wienerkernel(origimg,noise,blurredkernel,param):
 #     s_n= powerspectrum(noise)
 #     Power spectrum of original image
 #     s_f = powerspectrum(origimg)
-    s_n =1.
-    s_f = 100.
+    s_n =5.
+    s_f = 1.
     return np.conj(h)/((h*h)+param*(s_n/s_f))
 
 def wienerfilter(dftarr,noise,blurredkernel,param=1):
@@ -94,7 +89,7 @@ Inverse filter is calculated using F^ = G(u,v) H(u,v), since we know H(u,v) , wh
 we can simply return the inverse of H(u,v)
 '''
 def inversekernel(kernel):
-    return 1./kernel
+    return np.linalg.inv(kernel)
 
 def inversefilter(dftarr,noise, kernel):
     kernel = inversekernel(kernel)
