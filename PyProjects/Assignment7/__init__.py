@@ -67,6 +67,12 @@ g0_daub = np.array([0.23037781, 0.71484657, 0.63088076, -
                     0.02798376, -0.18703481, 0.03084138, 0.03288301, -0.0105940])
 g0_sym = np.array(
     [0.0322, -0.0126, -0.0992, 0.2979, 0.8037, 0.4976, -0.0296, -0.0758])
+h0_cohen = np.array(
+                    [0, 0.0019, -0.0019, -0.017, 0.0119, 0.0497, -0.0773, -0.0941, 0.4208, 0.8259, 0.4208, -0.0941, -0.0773, 0.0497, 0.0119, -0.017, -0.0019, 0.0010]
+                    )
+h1_cohen = np.array(
+                    [0, 0, 0, 0.0144, -0.0145, -0.0787, 0.0404, 0.4178, -0.7589, 0.4178, 0.0404, -0.0787, -0.0145, 0.0144, 0, 0, 0, 0]
+                    )
 mats = {'jpeg': jpegstd, 'zonal': zonal, 'threshold': thresholdmask,
         'threshold1': thresholdmask1, 'zonalbest': zonal_best}
 
@@ -100,7 +106,7 @@ def haarkernel(img):
 def daubechieskernel(inputimage):
     m, _ = inputimage.shape
     h0 = g0_daub[::-1]
-    g1 = [h0[i] * np.power(- 1., i) for i in range(len(g0_daub))]
+    g1 = [h0[i] * np.power(-1., i) for i in range(len(g0_daub))]
     h1 = g1[::-1]
     # return ((h0, h1), (g0_daub, g1))
     fwd = np.zeros((inputimage.shape))
@@ -113,11 +119,18 @@ def daubechieskernel(inputimage):
             fwd[(m / 2) + i, (2 * i + j) % m] = h1[j]
     return fwd.T
 
-
+def cohenkernel(inputimage):
+    m, _ = inputimage.shape
+    fwd = np.zeros((inputimage.shape))
+    for i in range(0, m / 2):
+        for j in range(len(h0_cohen)):
+            fwd[i, (2 * i + j) % m] = h0_cohen[j]
+            fwd[(m / 2) + i, (2 * i + j) % m] = h1_cohen[j]
+    return fwd.T
 def symletkernel(inputimage):
     m, _ = inputimage.shape
-    h0 = g0_sym[:: -1]
-    g1 = [h0[i] * np.power(- 1., i) for i in range(len(g0_daub))]
+    h0 = g0_sym[::-1]
+    g1 = [h0[i] * np.power(-1., i) for i in range(len(g0_daub))]
     h1 = g1[::-1]
 
     fwd = np.zeros((inputimage.shape))
@@ -128,7 +141,7 @@ def symletkernel(inputimage):
     return fwd.T
 
 wavelets = {'haar': haarkernel, 'daub': daubechieskernel,
-            'sym': symletkernel}
+            'sym': symletkernel , 'cohen':cohenkernel}
 
 
 def main():
