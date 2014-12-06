@@ -1,11 +1,13 @@
 from argparse import ArgumentParser
 import numpy as np
-from scipy import misc
+from scipy import misc, ndimage
+import scipy
+from scipy.signal.signaltools import convolve2d
 
 def main():
     args=parseArgs()
     inputimage = misc.imread(args.inputimage)
-    mask = np.array([[-1,-1,-1],[-1,9*args.a-1,-1],[-1,-1,-1]])
+    mask = np.array([[-1,-1,-1],[-1,9*args.a,-1],[-1,-1,-1]])
     outputimage = transform(inputimage,mask)
     writeimage(outputimage,args.o)
 
