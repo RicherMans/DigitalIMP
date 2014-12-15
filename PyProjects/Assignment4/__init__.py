@@ -1,11 +1,11 @@
 from argparse import ArgumentParser
 from scipy import misc, random
 import cmath
-import numpy as np
+import np as np
 import math
 from matplotlib import pyplot as plt
 from scipy.spatial.distance import pdist, squareform
-from numpy import real, matlib
+from np import real, matlib
 from numpy.matlib import randn
 import argparse
 import os

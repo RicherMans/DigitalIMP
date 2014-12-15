@@ -1,82 +1,275 @@
-\begin{abstractbook}
-\textbf{\begin{center}\end{center}}
-Caution : You need to give an English Abstract by begin-abstractbook.This is a template for SJTU speech lab tech reports.
-\end{abstractbook}
+\section{Assignment 2}
 
-\section{Task}
-\label{sec:intro}
-%\usepackage{indentfirst}
-%\setlength{\parindent}{2em} 
-The Task for Assignment 1 is it to evaluate a histogram equalizer. The methods of implementing this histogram equalizer are not specified which means that every student can use different approaches.
+In this exercise, the task is to write a convolution and use the laplacian operator to calculate the second derivative of the given image.
 
-\section{Implementation}
+The Laplacian, which is used is:
+\begin{gather*}
+\mathcal{L} = \left( \begin{array}{ccc}
+-1 & -1 & -1\\
+-1 & 9*A & -1\\
+-1 & -1 & -1
+\end{array} \right)
+\end{gather*}
+As it can be seen, the Laplacian sums up to 0, which is one property of the derivative for images in two dimensions.
+We did overall 3 experiments, which used the following parameters:
+\begin{gather*}
+A \in \left\lbrace 0.7,1.0,1.0 \right\rbrace
+\end{gather*}
 
-My implementation was done using python, especially numpy and scipy. Generally the implementation follows three steps:
-
-\begin{enumerate}
-\item For the ith element in k-graylevels , we firstly estimate the counts by using the current pixel $p(x,y)$ \begin{equation}
-c_i = \sum\limits_{i=0}^{k-1} p(x,y) = i
-\end{equation}
-
-\item Afterwards the distribution is calculated by using \begin{align}
-\frac{c_i}{c} \\
-c = \sum\limits_i c_i
-\end{align}
-
-\item The cdf is then calculated by summing up the last j frames of i. Furthermore these cdf's need to evaluated by multiplying them by the Grayscale-1, to find an appropriate mapping into the new space.
-\begin{align}
-cdf_i = \sum\limits_{b=0}^{j=i} c_b \\
-new_i = cdf_i * 255
-\end{align}
-
-\item Finally the old pixels need to be mapped into the new space, where a simple lookup in the $new_i$ array is sufficient.
-
-\end{enumerate}
+The resulting Pictures can be seen in "Assignment2"
 
 
-\section{Usage}
+\section{Assignment 3}
+In this exercise the task is to write different filters, for blurring purposes.
 
-The written program can be used with the following syntax.
+The program can be executed by using the following syntax:
+\begin{minted}[mathescape,
+               linenos,
+               numbersep=5pt,
+               frame=lines,
+               framesep=2mm]{bash}
+python __init__.py [inputfile] -k gaussian -sig 10 -o output
+\end{minted}
+It offers the following parameters:
 
-\begin{lstlisting}
-python __init__.py inputimagepath -oh1 orighistpath -oh2 transhistpath -o pictureoutpath
-\end{lstlisting}
+\begin{itemize}
+\item -o Outputs the processed file into the given path. Note that no directories will be generated.
+\item -s sets the size for the shape of the mask which will be used. The used mask will always be square
+\item -k sets the kernel type, 'gaussian','butterworth','ideal' are the only parameters, default is gaussian
+\item -sig the sigma / cutoff parameter for the gaussian/ideal/butterworth filters
+\end{itemize}
 
-The results can be seen below
+The outputfile which is going to be produced will be named as given in "-o".
 
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=14cm]{histoOrigFig1.png}
-\caption{Original Histogram of Figure 1}
-\label{fig:abc}
-\end{figure}
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=14cm]{histoTransFig1.png}
-\caption{Transformed Histogram of Figure 1}
-\label{fig:abc}
-\end{figure}
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=14cm]{histoOrigFig2.png}
-\caption{Original Histogram of Figure 2}
-\label{fig:abc}
-\end{figure}
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=14cm]{histoTransFig2.png}
-\caption{Transformed Histogram of Figure 2}
-\label{fig:abc}
-\end{figure}
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=14cm]{fig1out.jpg}
-\caption{Output image of Figure 1}
-\label{fig:abc}
-\end{figure}
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=14cm]{fig2out.jpg}
-\caption{Output image of Figure 2}
-\label{fig:abc}
-\end{figure}
+The output files have the following naming schema:
+
+\begin{minted}[mathescape,
+               linenos,
+               numbersep=5pt,
+               frame=lines,
+               framesep=2mm]{bash}
+KERNELNAME_sigma_SIGMAVALUE.tif
+\end{minted}
+
+Whereas "Kernelname" stands for the currently used kernel and "SIGMAVALUE" stands for the currently used Sigma value, given by -k.
+The most significant factor is the parameter sigma, whereas large sigmas lead to a heavy blurring and small sigmas to the contrary.
+
+
+\section{Assignment 4}
+
+In this exercise we implemented multiple filter types, which try to filter noise.
+
+Noise was applied on the input image,whereas two types of noise was used: uniformed and gaussian.
+
+In python it was easily implemented:
+\begin{minted}[mathescape,
+               linenos,
+               numbersep=5pt,
+               frame=lines,
+               framesep=2mm]{python}
+picture += np.random.uniform(low,high,size=picture.shape)
+picture += np.random.normal(mean,var,picture.shape)
+\end{minted}
+
+As an example, we show here the implementation of the harmonic filter:
+
+\begin{minted}[mathescape,
+               linenos,
+               numbersep=5pt,
+               frame=lines,
+               framesep=2mm]{python}
+def harmonicMeanFilter(arr,shape=(3,3)):
+    x,y = shape
+    xoff = x/2
+    yoff = y/2
+    transformedimg = np.copy(arr)
+    for i in range(xoff,len(arr)-xoff):
+        for j in range(yoff,len(arr[0])-yoff):
+            average = 0
+            for p in range(x):
+                for q in range(y):
+                    average += 1./arr[i+(p-xoff)][j+(q-yoff)]
+            if average<0:
+                average = 0
+            transformedimg[i][j] = (x*y)/average
+    return transformedimg
+\end{minted}
+
+The resulting images can be seen in the directory Assignment 4.
+
+\section{Assignment 5}
+The implementation of the wiener filter was troublesome.
+First of all, we should say that when applying the blurring filter on an image, one needs to consider the limits of the filter function should be used in the case of $u,v = 0$.
+In our case we used the following kernel:
+\begin{minted}[mathescape,
+               linenos,
+               numbersep=5pt,
+               frame=lines,
+               framesep=2mm]{python}
+def blurringkernel(shape, T, a, b):
+    xx, yy = shape
+    x, y = np.ogrid[(-xx / 2):(xx / 2), (-yy / 2):yy / 2]
+    q = (np.pi * (x * a + y * b))
+    q[np.where(q == 0)] = T
+    return (T / q) * np.sin(q) * np.exp(-1j * q)
+\end{minted}
+
+Moreover when using the inverse filter, one should set the offset values, if $u,v$ are once again $0$, to a fixed small $\epsilon$.
+The implementation of the wienerkernel was done using only fixed parameters for the SNR and the power spectrum.
+
+\begin{minted}[mathescape,
+               linenos,
+               numbersep=5pt,
+               frame=lines,
+               framesep=2mm]{python}
+def wienerkernel(origimg, blurredkernel, param, k):
+    '''
+    Calculates the wiener kernel, which is H*/(H^2+param*(S_n/S_f))
+    '''
+    h = blurredkernel
+    return np.conj(h).T / ((abs(h) ** 2) + (param * k))
+\end{minted}
+
+\section{Assignment 6}
+
+Using the bilinear and nearest neighbour interpolation methods, we achieve different results for the given operations. 
+Generally it can be seen that bilinear interpolation does perform for the given image slightly better, especially when using rotation.
+When using translation and scaling, the differences between the two methods are not easily seen. The implementations for scaling and translating are both straightforward and result for both methods in a roughly equal picture.
+
+Bilinear interpolation is given as:
+\begin{gather*} 
+\begin{array}{ l l}
+f(x,y) \approx & \, \frac{f(Q_{11})}{(x_2-x_1)(y_2-y_1)} (x_2-x)(y_2-y) \, + \\
+               & \, \frac{f(Q_{21})}{(x_2-x_1)(y_2-y_1)} (x-x_1)(y_2-y) \, + \\
+               & \, \frac{f(Q_{12})}{(x_2-x_1)(y_2-y_1)} (x_2-x)(y-y_1) \, + \\
+               & \, \frac{f(Q_{22})}{(x_2-x_1)(y_2-y_1)} (x-x_1)(y-y_1) \\
+   \qquad          = & \, \frac{1}{(x_2-x_1)(y_2-y_1)} \Big(   f(Q_{11})(x_2-x)(y_2-y) \, + \\
+               & \, \qquad \qquad \qquad \qquad \; \;    f(Q_{21})(x-x_1)(y_2-y) \, + \\
+               & \, \qquad \qquad \qquad \qquad \; \;    f(Q_{12})(x_2-x)(y-y_1) \, + \\
+               & \, \qquad \qquad \qquad \qquad \; \;    f(Q_{22})(x-x_1)(y-y_1) \quad \Big)
+\end{array}
+\end{gather*}
+
+The rotation was done using the following function:
+\begin{minted}[mathescape,
+               linenos,
+               numbersep=5pt,
+               frame=lines,
+               framesep=2mm]{python}
+def rotate(x, y, theta, ox, oy):
+    """Rotate arrays of coordinates x and y by theta radians about the
+    point (ox, oy).
+    """
+    s, c = np.sin(theta), np.cos(theta)
+    x, y = np.asarray(x) - ox, np.asarray(y) - oy
+    return x * c - y * s + ox, x * s + y * c + oy
+\end{minted}
+
+
+Nearest neightbor interpolation is straight forward:
+
+\begin{minted}[mathescape,
+               linenos,
+               numbersep=5pt,
+               frame=lines,
+               framesep=2mm]{python}
+def _interpolate(self, sx, sy):
+    return np.round(sx).astype(int), np.round(sy).astype(int)
+
+\end{minted}
+
+Bilinear interpolation is somewhat more complex, the formula used to calculate a new point is:
+
+\begin{minted}[mathescape,
+               linenos,
+               numbersep=5pt,
+               frame=lines,
+               framesep=2mm]{python}
+def _interpolate(self, im, x, y):
+        x = np.asarray(x)
+        y = np.asarray(y)
+    
+        x0 = np.floor(x).astype(int)
+        x1 = x0 + 1
+        y0 = np.floor(y).astype(int)
+        y1 = y0 + 1
+#         Clip the x0 and x1, so that we dont have to check later if they are in range of the img
+        x0 = np.clip(x0, 0, im.shape[1] - 1);
+        x1 = np.clip(x1, 0, im.shape[1] - 1);
+        y0 = np.clip(y0, 0, im.shape[0] - 1);
+        y1 = np.clip(y1, 0, im.shape[0] - 1);
+        Ia = im[ y0, x0 ]
+        Ib = im[ y1, x0 ]
+        Ic = im[ y0, x1 ]
+        Id = im[ y1, x1 ]
+        wa = (x1 - x) * (y1 - y)
+        wb = (x1 - x) * (y - y0)
+        wc = (x - x0) * (y1 - y)
+        wd = (x - x0) * (y - y0)
+        
+        return (wa * Ia + wb * Ib + wc * Ic + wd * Id)
+\end{minted}
+
+
+
+\section{Assignment 7}
+
+\subsection{Standard compression}
+The image compression was achieved using four different kernels:
+\begin{minted}[mathescape,
+               linenos,
+               numbersep=5pt,
+               frame=lines,
+               framesep=2mm]{python}
+zonal = np.array([
+    [1, 1, 1, 1, 1, 0, 0, 0],
+    [1, 1, 1, 1, 0, 0, 0, 0],
+    [1, 1, 1, 0, 0, 0, 0, 0],
+    [1, 1, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0]
+])
+zonal_best = np.array([
+    [1, 1, 1, 1, 1, 1, 1, 0],
+    [1, 1, 1, 1, 1, 1, 0, 0],
+    [1, 1, 1, 1, 1, 0, 0, 0],
+    [1, 1, 1, 1, 0, 0, 0, 0],
+    [1, 1, 1, 0, 0, 0, 0, 0],
+    [1, 1, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0]
+])
+thresholdmask = np.array([
+    [1, 1, 0, 1, 0, 0, 0, 0],
+    [1, 1, 1, 0, 0, 0, 0, 0],
+    [1, 1, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 1, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0]
+])
+jpegstd = np.array([[16, 11, 10, 16, 24, 40, 51, 61],
+                    [12, 12, 14, 19, 26, 58, 60, 55],
+                    [14, 13, 16, 24, 40, 57, 69, 56],
+                    [14, 17, 22, 29, 51, 87, 80, 62],
+                    [18, 22, 37, 56, 68, 109, 103, 77],
+                    [24, 35, 55, 64, 81, 104, 113, 92],
+                    [49, 64, 78, 87, 103, 121, 120, 101],
+                    [72, 92, 95, 98, 112, 100, 103, 99]
+                    ])
+\end{minted}
+
+Each of the kernels can be used within the program, using a different parameter given in the parameter "-quantmattype". The results for every of these masks can be seen in the Assignment7 directory.
+
+\subsection{Wavelets}
+
+The
+
+\section{Assignment 8}
+
+\section{Assignment 9}
+
+\section{Assignment 10}

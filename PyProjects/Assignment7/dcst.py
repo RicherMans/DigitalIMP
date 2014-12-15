@@ -2,7 +2,7 @@
 #
 # Functions to perform fast discrete cosine and sine transforms and
 # their inverses in one and two dimensions.  These functions work by
-# wrapping the DFT function from numpy, rather than explicitly
+# wrapping the DFT function from np, rather than explicitly
 # performing the cosine and sine transforms themselves.  The sine
 # transforms take arrays whose first element is zero and return arrays
 # whose first element is also zero.  This differs from some other
@@ -24,7 +24,7 @@
 ######################################################################
 
 
-from numpy import empty,arange,exp,real,imag,pi
+from np import empty,arange,exp,real,imag,pi
 from numpy.fft import rfft,irfft
 
 

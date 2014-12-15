@@ -2,9 +2,9 @@ import argparse
 from scipy import misc
 from scipy.ndimage.filters import convolve as convolveim
 from scipy.ndimage import gaussian_filter
-import numpy as np
+import np as np
 import sys
-from numpy import real
+from np import real
 
 
 def parseArgs():

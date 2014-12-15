@@ -1,6 +1,6 @@
 from scipy import misc
 from argparse import ArgumentParser
-import numpy as np
+import np as np
 from matplotlib import pyplot 
 from math import floor
 

@@ -1,8 +1,6 @@
 from argparse import ArgumentParser
-import numpy as np
-from scipy import misc, ndimage
-import scipy
-from scipy.signal.signaltools import convolve2d
+import np as np
+from scipy import misc
 
 def main():
     args=parseArgs()

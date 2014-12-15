@@ -5,11 +5,11 @@ import argparse
 from scipy import misc, fftpack
 from scipy.fftpack import dct
 import cmath
-import numpy as np
+import np as np
 from matplotlib import pyplot
 import scipy
 from scipy.linalg import block_diag
-from numpy import vstack
+from np import vstack
 from scipy import signal
 
 jpegstd = np.array([[16, 11, 10, 16, 24, 40, 51, 61],

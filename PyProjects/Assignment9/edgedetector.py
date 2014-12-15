@@ -35,8 +35,8 @@ def non_maximal_edge_suppresion(mag, orient):
 
 def main():
     args = parseArgs()
-#     maarhimg = filter_maar_hidlret(args.inputimage)
-#     misc.imsave('marr_hidlret.tif', maarhimg)
+    maarhimg = filter_maar_hidlret(args.inputimage)
+    misc.imsave('marr_hidlret_11.tif', maarhimg)
 #     misc.imsave('canny.tif',cannyimg.grad)
 #     sobelfilterd = filter_w_mask(args.inputimage, 'sobel')
 #     misc.imsave('sobel.tif',sobelfilterd)
@@ -47,8 +47,8 @@ def main():
 #     robertsfiltered = filter_w_mask(args.inputimage, 'roberts')
 #     misc.imsave('roberts.tif', robertsfiltered)
     
-    cannyedge = filter_canny(args.inputimage, 'prewitt')
-    misc.imsave('canny_edge.tif',cannyedge)
+#     cannyedge = filter_canny(args.inputimage, 'prewitt')
+#     misc.imsave('canny_edge.tif',cannyedge)
 
 def filter_w_mask(img,filttype='sobel'):
     gx,gy = calculategradient(img, filttype)
@@ -122,12 +122,11 @@ def filter_canny(inputimage, filttype):
 def filter_maar_hidlret(inputimage):
     filteredimg = filterimg(inputimage, maar_hidlret_kernel((25, 25), 4))
     laplacianimg = applylaplacian(filteredimg)
-    misc.imsave('test.tif', laplacianimg)
     return zero_crossings(laplacianimg)
 
 
 def sgn(n):
-    if n > 0:
+    if n:
         return 1
     else:
         return -1
@@ -197,7 +196,6 @@ def calculategradient(arr, filttype='sobel'):
     gx = filterimg(arr,x)
     gy = filterimg(arr,y)
     return gx, gy
-
 
 def applylaplacian(arr):
     mask = np.array([[1, 1, 1], [1, -9, 1], [1, 1, 1]])
