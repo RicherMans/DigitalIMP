@@ -23,147 +23,125 @@ test = np.array([
 ])
 
 test1 = np.array([
-                  [0,0,0,0,0,0,0],
-                  [0,0,0,1,0,0,0],
-                  [0,0,1,0,1,0,0],
-                  [0,0,1,0,0,0,0],
-                  [0,1,0,1,0,0,0],
-                  [0,1,1,1,0,0,0],
-                  [0,0,0,0,0,0,0],
+                  [0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 1, 0, 0, 0],
+                  [0, 0, 1, 0, 1, 0, 0],
+                  [0, 0, 1, 0, 0, 0, 0],
+                  [0, 1, 0, 1, 0, 0, 0],
+                  [0, 1, 1, 1, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0],
                   ])
 
+ystep = [0, 1, 1, 1, 0, -1, -1, -1]
+xstep = [-1, -1, 0, 1, 1, 1, 0, -1]
 
 def main():
-    follow_boundary((2, 3), test1)
-# args = parseArgs()
-# rescale image to binary
-# binimg = np.zeros((args.inputimage.shape))
-# binimg[args.inputimage > 1] = 1
-# boundary_follow(binimg)
+    chain = follow_boundary(test1)
+    encode_chain(chain)
+#     args = parseArgs()
+# #     rescale image to binary
+#     binimg = np.zeros((args.inputimage.shape))
+#     binimg[args.inputimage < 255] = 1
+#     follow_boundary((1,4), binimg)
+
 
 
 def encode_chain(chain):
+    codemap = {
+               (1, 0):0,
+               (1, 1):1,
+               (0, 1):2,
+               (-1, 1):3,
+               (-1, 0):4,
+               (-1, -1):5,
+               (0, -1):6,
+               (1, -1):7
+               }
+    
     for i in range(len(chain)):
-        x, y = chain[i]
-        x1,y1 = chain[i+1]
+        x, y = chain[i].b
+        x1, y1 = chain[(i + 1) % len(chain)].b
+        print codemap[(x1-x,y1-y)]
+        
 
 
-def follow_boundary(startpoint, array):
+
+
+def follow_boundary(array):
     '''
     startpoint is a tuple, consisting of x,y variable to  indicate which is the startpoint of this boundary.
     returns an arr
     '''
+    startpoint = findstartpoint(array)
     x, y = startpoint
-    ystep = [0, 1, 1, 1, 0, -1, -1, -1]
-    xstep = [-1, -1, 0, 1, 1, 1, 0, -1]
-    
 #     that is b0
-    iterate = [point((x,y),(-1,0))]
-#     iterate= [(x, y),tuple(zip(xstep,ystep))]
-    
-    foundpoints=[]
     b0 = (x, y)
     b1 = None
     b1_reached = False
+    iterate = [Point(b0, (-1, 0))]
+    foundpoints = []
     while(iterate and not b1_reached):
-#         bx, by,(xstep,ystep) = iterate.pop()
         curpoint = iterate.pop()
-        bx,by = curpoint.b
+        bx, by = curpoint.b
         
-        for i,(dx,dy) in enumerate(curpoint):
+        for i, (dx, dy) in enumerate(curpoint):
 #             Case of b1 being not initialized, we need to save it!
-            if (bx + dx,by + dy)==b1:
-                b1_reached= True
+            if (bx + dx, by + dy) == b1:
+                b1_reached = True
             if array[bx + dx][by + dy] == 1 and not b1:
-                b1=(bx + dx,by + dy)
-            if array[bx + dx][by + dy] == 1:
-#                 Append the current neighbor of bx,by to be a valid point and therefor found
-                foundb = (bx+dx,by+dy)
-                cx,cy = (curpoint)[i-1]
-#                 The offset is the new relative coordinate from the new found point b* to the newly found background point c*
-                offx,offy = cx-dx,cy-dy
-                foundc = (offx,offy)
-#                 Create a new point and store it in the iteration and the found array.
-                foundpoint = point(foundb,foundc)
-                print [i for i in curpoint]
-                print "for %i %i with c : %s point found: %s"%(bx,by,foundc,foundb)
-                found = np.copy(array)*255
-                found[foundb] = 2
-                cx,cy = foundc
-                found[bx+cx,by+cy] = 1
-                print found 
+                b1 = (bx + dx, by + dy)
+            if array[bx + dx][by + dy] == 1 and not b1_reached:
+#                 Append the current neighbor of bx,by to be a valid Point and therefor found
+                foundb = (bx + dx, by + dy)
+                cx, cy = (curpoint)[i - 1]
+#                 The offset is the new relative coordinate from the new found Point b* to the newly found background Point c*
+                offx, offy = cx - dx, cy - dy
+                foundc = (offx, offy)
+#                 Create a new Point and store it in the iteration and the found array.
+                foundpoint = Point(foundb, foundc)
                 foundpoints.append(foundpoint)
                 iterate.append(foundpoint)
                 break
-        print bx,by
         if b1_reached:
-            if (bx,by) == b0:
-                print foundpoints
-#     found = np.zeros(test.shape)
-#     for corr in foundpoints:
-#         x, y = corr.b
-#         found[x, y] = 1
-#     print found
-
-class point():
+            if (bx, by) == b0:
+                return foundpoints
+class Point():
+    ''' A container for the given Points, stores 2 variables and returns an iterator and a given item
+        The iterator returns for the current point the circle around it.
+    '''
+    neighboriter = zip(xstep, ystep)
     
-    xstep = [-1, -1, 0, 1, 1, 1, 0, -1]
-    ystep = [0, 1, 1, 1, 0, -1, -1, -1]
-    
-    neighboriter = zip(xstep,ystep)
-    
-    def __init__(self,b,c):
+    def __init__(self, b, c):
         self.b = b
         self.c = c
         
     def __repr__(self):
-        ret = " ".join(str(self.b))
+        ret = "".join(str(self.b))
         return ret
     
     def __iter__(self):
-        index= self.neighboriter.index(self.c )
+        index = self.neighboriter.index(self.c)
 #         We need to check both of the slices, we get on one side the left over circle and on the other, the "togo"
-        return iter(self.neighboriter[index:]+self.neighboriter[:index])
+        return iter(self.neighboriter[index:] + self.neighboriter[:index])
     
-    def __getitem__(self,key):
-        index= self.neighboriter.index(self.c)
-        iterlist = self.neighboriter[index:]+self.neighboriter[:index]
+    def __getitem__(self, key):
+        index = self.neighboriter.index(self.c)
+        iterlist = self.neighboriter[index:] + self.neighboriter[:index]
         return iterlist[key]
 #     During looping, the in operator can be used to check the b value
     def __eq__(self, other):
         return other == self.b
 
-def boundary_follow(binimg):
-    x, y = np.where(binimg == 1)
-# The problem for choosing the uppermost left most point, is choosing the x,y
-# pair which has the lowest indices as values
-    xy_pair = np.sqrt(x.argmin() ** 2 + y[x.argmin()] ** 2)
-    yx_pair = np.sqrt(y.argmin() ** 2 + x[y.argmin()] ** 2)
-    b0 = 0
-    c0 = 0
-    if xy_pair < yx_pair:
-        b0 = (x[y.argmin()], y.argmin())
-        c0 = (x[y.argmin()] - 1, y.argmin())
-    else:
-        b0 = (x.argmin(), y[x.argmin()])
-        c0 = (x.argmin() - 1, y[x.argmin()])
-    sx, sy = b0
-    b1 = 0
-    foundbs = []
-    foundcs = []
-    ystep = [0, 1, 1, 1, 0, -1, -1, -1]
-    xstep = [-1, -1, 0, 1, 1, 1, 0, -1]
-    for x in range(sx, len(binimg) - 1):
-        for y in range(sy, len(binimg[0]) - 1):
-            b = 0
-            c = 0
-            for dx, dy in zip(xstep, ystep):
-                if binimg[x + dx][y + dy] == 1 and not b1:
-                    b1 = (x + dx, y + dy)
-                binimg[x + dx][y + dy] == 1
-                if binimg[x + dx][y + dy] == 0 and not c:
-                    c = (x + dx, y + dy)
 
+def findstartpoint(binimg):
+    x, y = np.where(binimg == binimg.max())
+# The problem for choosing the uppermost left most Point, is choosing the x,y
+# pair which has the lowest indices as values
+
+    ind = (x + y).argmin()
+#     Return the first occurance of the lowest value
+    return (x[ind], y[ind])
+    
 
 def parseArgs():
     parser = argparse.ArgumentParser()
