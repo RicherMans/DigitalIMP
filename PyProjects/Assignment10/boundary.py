@@ -3,11 +3,12 @@ Created on Nov 28, 2014
 
 @author: richman
 '''
+import sys
+from scipy.signal.signaltools import convolve2d
 '''
 Note that in this exercise the given image seems to be binary, yet python
-reads in a grayscale one, so we simply readjust it
+reads in a grayscale one, so we simply readadjust it
 '''
-
 import argparse
 from scipy import misc
 import numpy as np
@@ -36,15 +37,63 @@ ystep = [0, 1, 1, 1, 0, -1, -1, -1]
 xstep = [-1, -1, 0, 1, 1, 1, 0, -1]
 
 def main():
-    chain = follow_boundary(test1)
-    encode_chain(chain)
-#     args = parseArgs()
-# #     rescale image to binary
-#     binimg = np.zeros((args.inputimage.shape))
-#     binimg[args.inputimage < 255] = 1
-#     follow_boundary((1,4), binimg)
+    args = parseArgs()
+#     rescale image to binary
+    filtimg = np.zeros((args.inputimage.shape))
+    filtimg[args.inputimage>250] = 1
+    boundary = follow_boundary(filtimg)
+#     Print the boundary, setting all values to white where the boundary is found
+    for i in boundary:
+        x,y = i.b
+        filtimg[x,y] = 255
+    misc.imsave('boundary_followed.tif',filtimg)
+    gridmeasures = grid(filtimg,boundary,20)
+    gridimg = np.zeros_like(filtimg)
+#     Print the grid
+    for gridmeasure in gridmeasures:
+        x,y = gridmeasure
+        gridimg[x,y] = 255
+    misc.imsave('grid.tif',gridimg)
+#     Calculate the chaincode
+    chain = encode_chain(boundary)
+    levelencoded = levelencode(chain)
+    print "Chaincode : "
+    for i in range(len(chain)):
+        print chain[i],
+    print
+    print "Firstlevel difference: "
+    for i in range(len(levelencoded)):
+        print levelencoded[i],
+    
+    
+    
+def avg(img):
+    return convolve2d(img,np.ones((9,9)),'same')
 
 
+def closest_node(node, nodes):
+    nodes = np.asarray(nodes)
+    dist_2 = np.sum((nodes - node)**2, axis=1)
+    return np.argmin(dist_2)
+
+def grid(img,boundary,gridstep=30):
+    grid = np.array([[(i,j) for i in range(0,len(img),gridstep)] for j in range(0,len(img),gridstep) ])
+    coordinates = []
+    for point in boundary:
+#         Find the closest point of x,y
+        tmpmin = sys.maxint
+        coords = 0.
+        for x in range(len(grid)):
+            for y in range(len(grid[0])):
+                dist=np.sum((grid[x,y] - point.b)**2)
+                if dist < tmpmin:
+                    tmpmin = dist
+                    coords = grid[x,y]
+        coordinates.append(coords)
+    return coordinates
+    
+def levelencode(chain,mode=8):
+    return [(mode - (chain[i]-chain[i+1]))%mode  for i in range(len(chain)-1)]
 
 def encode_chain(chain):
     codemap = {
@@ -57,13 +106,12 @@ def encode_chain(chain):
                (0, -1):6,
                (1, -1):7
                }
-    
+    chaincode = []
     for i in range(len(chain)):
         x, y = chain[i].b
         x1, y1 = chain[(i + 1) % len(chain)].b
-        print codemap[(x1-x,y1-y)]
-        
-
+        chaincode.append(codemap[(x1-x,y1-y)])
+    return chaincode
 
 
 
@@ -83,11 +131,11 @@ def follow_boundary(array):
     while(iterate and not b1_reached):
         curpoint = iterate.pop()
         bx, by = curpoint.b
-        
         for i, (dx, dy) in enumerate(curpoint):
-#             Case of b1 being not initialized, we need to save it!
+#             If we find again our b1, we set a flag and stop the iterations
             if (bx + dx, by + dy) == b1:
                 b1_reached = True
+#             Case of b1 being not initialized, we need to save it!
             if array[bx + dx][by + dy] == 1 and not b1:
                 b1 = (bx + dx, by + dy)
             if array[bx + dx][by + dy] == 1 and not b1_reached:
@@ -139,6 +187,7 @@ def findstartpoint(binimg):
 # pair which has the lowest indices as values
 
     ind = (x + y).argmin()
+    
 #     Return the first occurance of the lowest value
     return (x[ind], y[ind])
     
@@ -151,3 +200,4 @@ def parseArgs():
 
 if __name__ == '__main__':
     main()
+

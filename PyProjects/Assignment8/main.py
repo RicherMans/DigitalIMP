@@ -6,7 +6,6 @@ Created on 21 Nov, 2014
 import argparse
 from scipy import misc
 import numpy as np
-from matplotlib.pyplot import imshow, show
 
 
 def _masks(key):
@@ -66,15 +65,6 @@ def holefilling(inputimg,mask):
         x_0 = diletated & complement_inputimg
         if (lastx == x_0).all():
             break
-#     for i in range(maskoffset, len(inputimg) - maskoffset):
-#         for j in range(maskoffset, len(inputimg[0]) - maskoffset):
-            
-#             structureelement = x_0[i - maskoffset:i + maskoffset + 1, j - maskoffset:j + maskoffset + 1] | mask
-#             result = structureelement & complement_inputimg [i - maskoffset:i + maskoffset + 1, j - maskoffset:j + maskoffset + 1]
-# #             print "before" ,x_0[i - maskoffset:i + maskoffset + 1, j - maskoffset:j + maskoffset + 1]
-#             x_0[i - maskoffset:i + maskoffset + 1, j - maskoffset:j + maskoffset + 1] = result
-#             print "Resultmat : ",result
-#             print "After" ,x_0[i - maskoffset:i + maskoffset + 1, j - maskoffset:j + maskoffset + 1]
     return x_0 |inputimg
 
 
@@ -113,7 +103,6 @@ def erosion(inputimg, mask):
             curmask = inputimg[i - maskoffset:i + maskoffset + 1, j - maskoffset:j + maskoffset + 1] & mask
             if (curmask == mask).all() :
                 returnimg[i, j] = 1
-#    Slice up the resulting image since the borders do not fit into the mask
     return returnimg
 
 if __name__ == '__main__':
