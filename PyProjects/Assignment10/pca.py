@@ -7,7 +7,9 @@ import argparse
 from scipy import misc
 import os
 import numpy as np
+import sklearn
 
+from sklearn import decomposition
 
 def parseArgs():
     parser = argparse.ArgumentParser()
@@ -23,8 +25,8 @@ def reconstruct(y,mean_x,mat_A):
     '''
     mean_x = mean_x.reshape(6,1)
     ret = np.dot(mat_A.T,y.T) + mean_x
+    print ret.shape
     return ret
-#     return ret.reshape(6,564,564)
 
 def pca(arr,n_components):
     #     TODO: No idea why it doesnt work!
@@ -55,7 +57,7 @@ def main():
                 for x in os.listdir(args.inputdir)]
     inputimages = [misc.imread(pic).flatten() for pic in picpaths]
     num_imgs =  len(inputimages)
-    
+
 #     First of all we transform the input from (6,N,N) to (N,N,6), getting
 #   for every pixel n,n a 6 dimensional vector.
     # create matrix to store all flattened images

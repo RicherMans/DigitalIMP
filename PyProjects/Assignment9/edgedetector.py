@@ -12,10 +12,12 @@ from scipy.signal.signaltools import convolve2d
 import scipy.ndimage as ndi
 from matplotlib import pyplot
 
+
 def parseArgs():
     parser = argparse.ArgumentParser()
     parser.add_argument('inputimage', type=misc.imread)
     return parser.parse_args()
+
 
 def non_maximal_edge_suppresion(mag, orient):
     """Non Maximal suppression of gradient magnitude and orientation."""
@@ -23,15 +25,16 @@ def non_maximal_edge_suppresion(mag, orient):
     abin = ((orient + np.pi) * 4 / np.pi + 0.5).astype('int') % 4
 
     mask = np.zeros(mag.shape, dtype='bool')
-    mask[1:-1,1:-1] = True
+    mask[1:-1, 1:-1] = True
     edge_map = np.zeros(mag.shape, dtype='bool')
-    offsets = ((1,0), (1,1), (0,1), (-1,1))
+    offsets = ((1, 0), (1, 1), (0, 1), (-1, 1))
     for a, (di, dj) in zip(range(4), offsets):
-        cand_idx = np.nonzero(np.logical_and(abin==a, mask))
-        for i,j in zip(*cand_idx):
-            if mag[i,j] > mag[i+di,j+dj] and mag[i,j] > mag[i-di,j-dj]:
-                edge_map[i,j] = True
+        cand_idx = np.nonzero(np.logical_and(abin == a, mask))
+        for i, j in zip(*cand_idx):
+            if mag[i, j] > mag[i + di, j + dj] and mag[i, j] > mag[i - di, j - dj]:
+                edge_map[i, j] = True
     return edge_map
+
 
 def main():
     args = parseArgs()
@@ -40,37 +43,43 @@ def main():
 #     misc.imsave('canny.tif',cannyimg.grad)
 #     sobelfilterd = filter_w_mask(args.inputimage, 'sobel')
 #     misc.imsave('sobel.tif',sobelfilterd)
-#      
+#
 #     prewittfiltered = filter_w_mask(args.inputimage, 'prewitt')
 #     misc.imsave('prewitt.tif', prewittfiltered)
 
 #     robertsfiltered = filter_w_mask(args.inputimage, 'roberts')
 #     misc.imsave('roberts.tif', robertsfiltered)
-    
+
 #     cannyedge = filter_canny(args.inputimage, 'prewitt')
 #     misc.imsave('canny_edge.tif',cannyedge)
 
-def filter_w_mask(img,filttype='sobel'):
-    gx,gy = calculategradient(img, filttype)
+
+def filter_w_mask(img, filttype='sobel'):
+    gx, gy = calculategradient(img, filttype)
     g = gradientmagnitude(gx, gy)
     g[g > 255] = 255
     return g
 
+
 def filter_canny(inputimage, filttype):
 
-    gaussianfiltered = gaussian_filter(inputimage, 2.,mode='constant')
+    gaussianfiltered = gaussian_filter(inputimage, 2., mode='constant')
     gx, gy = calculategradient(gaussianfiltered, filttype)
     mag = gradientmagnitude(gx, gy)
-    angle = (directionangle(gx, gy)*180/np.pi)+180
+    angle = (directionangle(gx, gy) * 180 / np.pi) + 180
 #     maximum suppression
     width, height = angle.shape
 #     Change the angles to either being -45,0,45,90
-      
-    angle[(angle < 22.5) | (angle > 337.5) & (angle < 202.5) | (angle > 157.5) ] = 0.
-    angle[((angle >= 22.5) & (angle <= 67.5)) | ((angle >= 202.5) & (angle <= 247.5))] = 45.
-    angle[((angle > 67.5) & (angle < 112.5)) | ((angle >= 247.5) & (angle <= 292.5))] = 90.
-    angle[((angle <= 157.5) & (angle > 112.5)) | ((angle >= 292.5) & (angle <= 337.5))] = -45.
-      
+
+    angle[(angle < 22.5) | (angle > 337.5) & (
+        angle < 202.5) | (angle > 157.5)] = 0.
+    angle[((angle >= 22.5) & (angle <= 67.5)) | (
+        (angle >= 202.5) & (angle <= 247.5))] = 45.
+    angle[((angle > 67.5) & (angle < 112.5)) | (
+        (angle >= 247.5) & (angle <= 292.5))] = 90.
+    angle[((angle <= 157.5) & (angle > 112.5)) | (
+        (angle >= 292.5) & (angle <= 337.5))] = -45.
+
     mag_sup = np.copy(mag)
     for x in range(1, width - 1):
         for y in range(1, height - 1):
@@ -92,17 +101,18 @@ def filter_canny(inputimage, filttype):
                     mag_sup[x][y] = 0
 #     Edge linking
     m = np.max(mag_sup)
-    th = m*0.1
-    tl = th/2
-    gnh = np.zeros((width, height),dtype=float)
-    gnl = np.zeros((width, height),dtype=float)
-    for x in range(1,width-1):
-        for y in range(1,height-1):
+    th = m * 0.1
+    tl = th / 2
+    gnh = np.zeros((width, height), dtype=float)
+    gnl = np.zeros((width, height), dtype=float)
+    for x in range(1, width - 1):
+        for y in range(1, height - 1):
             if mag_sup[x][y] >= th:
-                gnh[x][ y] = mag_sup[x][y]
+                gnh[x][y] = mag_sup[x][y]
             if mag_sup[x][y] >= tl:
-                gnl[x][ y] = mag_sup[x][y]
+                gnl[x][y] = mag_sup[x][y]
     gnl = gnl - gnh
+
     def traverse(i, j):
         x = [-1, 0, 1, -1, 1, -1, 0, 1]
         y = [-1, -1, -1, 0, 0, 1, 1, 1]
@@ -115,7 +125,7 @@ def filter_canny(inputimage, filttype):
             if gnh[i][j]:
                 gnh[i, j] = 1
                 traverse(i, j)
-    gnh[gnh>255]=255
+    gnh[gnh > 255] = 255
     return gnh
 
 
@@ -133,11 +143,11 @@ def sgn(n):
 
 
 def gradientmagnitude(gx, gy):
-    return np.hypot(gx,gy)
+    return np.hypot(gx, gy)
 
 
 def directionangle(gx, gy):
-    return np.arctan2(gy , gx)
+    return np.arctan2(gy, gx)
 # Better use the library, will be otherwise hard to read
 
 
@@ -161,7 +171,7 @@ def eucl_dist(i, j, M, N):
 def zero_crossings(arr):
     threshold = 10
     offset = 1
-    ret = np.zeros((arr.shape),dtype=bool)
+    ret = np.zeros((arr.shape), dtype=bool)
     for i in range(offset, len(arr) - offset):
         for j in range(offset, len(arr[0]) - offset):
             if sgn(arr[i + offset][j]) != sgn(arr[i - offset][j]) and (abs(arr[i + offset][j]) - abs(arr[i - offset][j])) > threshold:
@@ -193,9 +203,10 @@ def calculategradient(arr, filttype='sobel'):
 #     masks = {'sobel': ndi.filters.sobel, 'prewitt': ndi.filters.prewitt, 'roberts': None}
     x, y = masks[filttype]
 #     Once again remove the boundaries
-    gx = filterimg(arr,x)
-    gy = filterimg(arr,y)
+    gx = filterimg(arr, x)
+    gy = filterimg(arr, y)
     return gx, gy
+
 
 def applylaplacian(arr):
     mask = np.array([[1, 1, 1], [1, -9, 1], [1, 1, 1]])
@@ -203,7 +214,7 @@ def applylaplacian(arr):
 
 
 def filterimg(arr, mask):
-    return convolve2d(arr,mask)
+    return convolve2d(arr, mask)
 
 
 def maar_hidlret_kernel(size, sigma):
