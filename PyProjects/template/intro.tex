@@ -1,22 +1,26 @@
 \section{Assignment 2}
 
-In this exercise, the task is to write a convolution and use the laplacian operator to calculate the second derivative of the given image.
+In this exercise, the task is to write a convolution and use the laplacian operator, sobel and the power law enhance the given image.
 
 The Laplacian, which is used is:
 \begin{gather*}
 \mathcal{L} = \left( \begin{array}{ccc}
 -1 & -1 & -1\\
--1 & 9*A & -1\\
+-1 &  8 & -1\\
 -1 & -1 & -1
 \end{array} \right)
 \end{gather*}
 As it can be seen, the Laplacian sums up to 0, which is one property of the derivative for images in two dimensions.
-We did overall 3 experiments, which used the following parameters:
-\begin{gather*}
-A \in \left\lbrace 0.7,1.0,1.0 \right\rbrace
-\end{gather*}
-
-The resulting Pictures can be seen in "Assignment2"
+We did overall do the following:
+\begin{enumerate}
+\item Apply the laplacian on the given image
+\item Sharpen it by adding to the laplacian image the original image
+\item Calculate the gradient magnitude from, using the sobel operator
+\item Smooth the sobel by a $5 \times 5$ mask
+\item Mask the smoothed image by multiplying the smoothed with the sharpened image
+\item Use the power law transformation to generate the final image
+\end{enumerate}
+On every step, one output image is produced. We can see this outputimage in the Assignment2 Folder.
 
 
 \section{Assignment 3}
