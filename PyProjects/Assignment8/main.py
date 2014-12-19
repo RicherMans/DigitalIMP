@@ -30,16 +30,16 @@ def main():
         openimg = opening(args.inputimage, mask)
         closeimg = closing(args.inputimage, mask)
         if args.o:
-            misc.imsave(args.o + '_erosion.tif', eros)
-            misc.imsave(args.o + '_diletation.tif', dile)
-            misc.imsave(args.o + '_opening.tif', openimg)
-            misc.imsave(args.o + '_closing.tif', closeimg)
+            misc.imsave(args.o + '_erosion.jpg', eros)
+            misc.imsave(args.o + '_diletation.jpg', dile)
+            misc.imsave(args.o + '_opening.jpg', openimg)
+            misc.imsave(args.o + '_closing.jpg', closeimg)
     if args.s:
         boundary_extract = boundaryextraction(args.inputimage,mask)
         hole_filled_img = holefilling(args.inputimage, mask)
         if args.o:
-            misc.imsave(args.o + '_boundaryextraction.tif',boundary_extract)
-            misc.imsave(args.o + '_holesfilled.tif',hole_filled_img)
+            misc.imsave(args.o + '_boundaryextraction.jpg',boundary_extract)
+            misc.imsave(args.o + '_holesfilled.jpg',hole_filled_img)
     
 def parseArgs():
     parser = argparse.ArgumentParser()

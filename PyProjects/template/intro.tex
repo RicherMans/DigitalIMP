@@ -22,6 +22,38 @@ We did overall do the following:
 \end{enumerate}
 On every step, one output image is produced. We can see this outputimage in the Assignment2 Folder.
 
+\begin{figure*}[ht!]
+    \centering
+  \subfigure[Laplacian of the Inputimage]{
+   \includegraphics[width=0.25\textwidth] {Laplacian_skeleton.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Sobel of the inputimage]{
+   \includegraphics[width=0.25\textwidth] {Sobel_skeleton.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+ \subfigure[Sharpened image, sum of inputimage and laplacian]{
+   \includegraphics[width=0.25\textwidth] {Sharpened_skeleton.jpg}
+   \label{fig:subfig1}
+ }
+ \subfigure[Smoothed Sobel]{
+   \includegraphics[width=0.25\textwidth] {smooth_skeleton.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Product of Smoothed and Laplacian]{
+   \includegraphics[width=0.25\textwidth] {maskedimg_skeleton.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Power law transformation using $c=1 ,\gamma=0.5$]{
+   \includegraphics[width=0.25\textwidth] {final_skeleton.jpg}
+   \label{fig:subfig1}
+ }
+\end{figure*}
+
 
 \section{Assignment 3}
 In this exercise the task is to write different filters, for blurring purposes.
@@ -57,6 +89,66 @@ KERNELNAME_sigma_SIGMAVALUE.tif
 
 Whereas "Kernelname" stands for the currently used kernel and "SIGMAVALUE" stands for the currently used Sigma value, given by -k.
 The most significant factor is the parameter sigma, whereas large sigmas lead to a heavy blurring and small sigmas to the contrary.
+
+
+\begin{figure*}[H]
+    \centering
+  \subfigure[Gaussian blur with $\sigma = 5$]{
+   \includegraphics[width=0.25\textwidth] {gauss_sigma_5.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Gaussian blur with $\sigma = 10$]{
+   \includegraphics[width=0.25\textwidth] {gauss_sigma_10.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+ \subfigure[Gaussian blur with $\sigma = 20$]{
+   \includegraphics[width=0.25\textwidth] {gauss_sigma_20.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+ \subfigure[Gaussian blur with $\sigma = 30$]{
+   \includegraphics[width=0.25\textwidth] {gauss_sigma_30.jpg}
+   \label{fig:subfig1}
+ }
+ 
+ \subfigure[Butterworth filter with Cutoff Frequency $\sigma = 2$]{
+   \includegraphics[width=0.25\textwidth] {butter_sigma_2.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Butterworth filter with Cutoff Frequency $\sigma = 5$]{
+   \includegraphics[width=0.25\textwidth] {butter_sigma_5.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Butterworth filter with Cutoff Frequency $\sigma = 10$]{
+   \includegraphics[width=0.25\textwidth] {butter_sigma_10.jpg}
+   \label{fig:subfig1}
+ }
+  ~
+  \subfigure[Butterworth filter with Cutoff Frequency $\sigma = 30$]{
+   \includegraphics[width=0.25\textwidth] {butter_sigma_30.jpg}
+   \label{fig:subfig1}
+ }
+ 
+ \subfigure[Ideal filter with Cutoff Frequency $\sigma = 2$]{
+   \includegraphics[width=0.25\textwidth] {ideal_sigma_2.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Ideal filter with Cutoff Frequency $\sigma = 5$]{
+   \includegraphics[width=0.25\textwidth] {ideal_sigma_5.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Ideal filter with Cutoff Frequency $\sigma = 10$]{
+   \includegraphics[width=0.25\textwidth] {ideal_sigma_10.jpg}
+   \label{fig:subfig1}
+ }
+\end{figure*}
+
 
 
 \section{Assignment 4}
@@ -133,6 +225,51 @@ def wienerkernel(origimg, blurredkernel, param, k):
     h = blurredkernel
     return np.conj(h).T / ((abs(h) ** 2) + (param * k))
 \end{minted}
+
+\begin{figure*}[ht!]
+    \centering
+  \subfigure[Blurred Image]{
+   \includegraphics[width=0.25\textwidth] {blurred.jpg}
+ }
+  ~
+ \subfigure[Blurred image with gaussian noise]{
+   \includegraphics[width=0.25\textwidth] {blurred_w_gauss.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Inverse Filter]{
+   \includegraphics[width=0.25\textwidth] {restored_inversefilt.jpg}
+   \label{fig:subfig1}
+ }
+
+ \subfigure[Wiener with parameter $k = 2$, power spectrum $p=5$]{
+   \includegraphics[width=0.25\textwidth] {restored_wiener_param2-5.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Wiener with parameter $k = 0.1$, power spectrum $p=1$]{
+   \includegraphics[width=0.25\textwidth] {restored_wiener_param011.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Wiener with parameter $k = 2$, power spectrum $p=1$]{
+   \includegraphics[width=0.25\textwidth] {restored_wiener_param2-1.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Wiener with parameter $k = 0$, power spectrum $p=5$]{
+   \includegraphics[width=0.25\textwidth] {restored_wiener_param05.jpg}
+   \label{fig:subfig1}
+ }
+  ~
+  \subfigure[Wiener with parameter $k = 2$, power spectrum $p=6$]{
+   \includegraphics[width=0.25\textwidth] {restored_wiener_param2-6.jpg}
+   \label{fig:subfig1}
+ }
+ 
+\end{figure*}
+
+
 
 \section{Assignment 6}
 
@@ -216,6 +353,8 @@ def _interpolate(self, im, x, y):
 
 
 
+
+
 \section{Assignment 7}
 
 \subsection{Standard compression}
@@ -268,6 +407,51 @@ jpegstd = np.array([[16, 11, 10, 16, 24, 40, 51, 61],
 
 Each of the kernels can be used within the program, using a different parameter given in the parameter "-quantmattype". The results for every of these masks can be seen in the Assignment7 directory.
 
+\begin{figure*}[h!]
+    \centering
+  \subfigure[Rotation by 40 degrees, Nearest neighbour]{
+   \includegraphics[width=0.25\textwidth] {rotatedimg_40_nn.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Rotation by 40 degrees, Bilinear]{
+   \includegraphics[width=0.25\textwidth] {rotatedimg_40_bi.jpg}
+   \label{fig:subfig1}
+ }
+ 
+ 
+ \subfigure[Rotation by 60 degrees, Nearest neighbour]{
+   \includegraphics[width=0.25\textwidth] {rotatedimg_60_nn.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+ \subfigure[Rotation by 60 degrees, Bilinear]{
+   \includegraphics[width=0.25\textwidth] {rotatedimg_60_bi.jpg}
+   \label{fig:subfig1}
+ }
+ 
+  \subfigure[Translation by 50, 20 pixels, nearest neighbour]{
+   \includegraphics[width=0.25\textwidth] {tranlatedimg_50_20_nn.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Translation by 50, 20 pixels, bilinear]{
+   \includegraphics[width=0.25\textwidth] {tranlatedimg_50_20_bi.jpg}
+   \label{fig:subfig1}
+ }
+ 
+  \subfigure[Scaled by factor 2, Nearest neighbor]{
+   \includegraphics[width=0.25\textwidth] {scaledimg_2_nn.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Scaled by factor 2, bilinear]{
+   \includegraphics[width=0.25\textwidth] {scaledimg_2_bi.jpg}
+   \label{fig:subfig1}
+ }
+\end{figure*}
+
+
 
 
 \subsection{Wavelets}
@@ -283,22 +467,24 @@ where $H$ is the wavelet transform matrix and $B$ is the resulting encoded image
 Constructing $H$ is a little bit complicated. Generally we construct $H$ as having two components. The upper component, which values all sum up to $2$ and the lower component, which sums up to $0$. Therefore we split the matrix $H$ from the beginning on in two halves and then insert the values for the corresponding wavelet.
 In the case of Haar wavelets, we used the Kronecker Product:
 
-\begin{gather*}
+\begin{gather}
 I \otimes h_0 = \left( \begin{array}{ccccccc}
 \frac{1}{\sqrt(2)} & \frac{1}{\sqrt(2)} & 0 & 0 & 0 & \ldots & 0 \\
 0 & 0 & \frac{1}{\sqrt(2)} & \frac{1}{\sqrt(2)} & 0 & \ldots & 0 \\
 0 & 0 & 0 & 0 & \ddots & \ddots & 0 \\
 \vdots & \vdots & \vdots & \vdots & \vdots & \ddots & 0\\
 0 & 0 & 0 & 0 & 0 & \frac{1}{\sqrt(2)} & \frac{1}{\sqrt(2)}
-\end{array} \right)\\
+\end{array} \right)
+\end{gather}
+\begin{gather}
 I \otimes h_1 = \left( \begin{array}{ccccccc}
 \frac{1}{\sqrt(2)} & -\frac{1}{\sqrt(2)} & 0 & 0 & 0 & \ldots & 0 \\
 0 & 0 & \frac{1}{\sqrt(2)} & -\frac{1}{\sqrt(2)} & 0 & \ldots & 0 \\
 0 & 0 & 0 & 0 & \ddots & \ddots & 0 \\
 \vdots & \vdots & \vdots & \vdots & \vdots & \ddots & 0\\
 0 & 0 & 0 & 0 & 0 & \frac{1}{\sqrt(2)} & -\frac{1}{\sqrt(2)}
-\end{array} \right)\\
-\end{gather*}
+\end{array} \right)
+\end{gather}
 Afterwards we simply concatenate both halves together ( stack them on each other, row wise ) and obtain the transformation matrix $H$.
 
 Calculating the reconstruction is a simple task due to this operation:
@@ -323,6 +509,107 @@ b & c & d & 0 & \ldots & 0 & 0 & a \\
 As it can be seen the array "rolls" within the matrix. Using this we can easily compute the matrix $H$ for the daubechies, symlet and cohen wavelet.
 
 The calculations for the encoding and decoding still remain the same, and the usage of the inverse function $g_0$,$g_1$ are completely avoided, thus having a much more efficient and clean solution for the wavelet problem.
+
+\begin{figure*}[h!]
+    \centering
+  \subfigure[Zonal, good quality reconstruction]{
+   \includegraphics[width=0.25\textwidth] {zonal_best_reconstructed.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Zonal, good quality, reconstructed]{
+   \includegraphics[width=0.25\textwidth] {zonal_best_diff.jpg}
+   \label{fig:subfig1}
+ }
+ 
+ 
+ \subfigure[Threshold mask, reconstruction]{
+   \includegraphics[width=0.25\textwidth] {threshold_1_reconstructed.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+ \subfigure[Threshold mask, diff]{
+   \includegraphics[width=0.25\textwidth] {threshold_1_diff.jpg}
+   \label{fig:subfig1}
+ }
+ 
+  \subfigure[Threshold mask, reconstruction]{
+   \includegraphics[width=0.25\textwidth] {threshold_2_reconstructed.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Threshold mask, diff]{
+   \includegraphics[width=0.25\textwidth] {threshold_2_diff.jpg}
+   \label{fig:subfig1}
+ }
+\end{figure*}
+
+\begin{figure*}[h!]
+    \centering
+  \subfigure[Haar wavelet encoded]{
+   \includegraphics[width=0.25\textwidth] {lena_haar_encoded.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Haar wavelet, reconstructed, removing all components < 5]{
+   \includegraphics[width=0.25\textwidth] {lena_haar_reconstructed.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Haar, diff]{
+   \includegraphics[width=0.25\textwidth] {lena_haar_diff.jpg}
+   \label{fig:subfig1}
+ }
+ 
+ 
+ \subfigure[Daubechies 8-tap encoded]{
+   \includegraphics[width=0.25\textwidth] {lena_daub_encoded.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+ \subfigure[Daubechies 8-tap reconstructed]{
+   \includegraphics[width=0.25\textwidth] {lena_daub_reconstructed.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Daubechies 8-tap diff]{
+   \includegraphics[width=0.25\textwidth] {lena_daub_diff.jpg}
+   \label{fig:subfig1}
+ }
+ 
+  \subfigure[Symlet 8-tap encoded]{
+   \includegraphics[width=0.25\textwidth] {lena_sym_encoded.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+ \subfigure[Stmlet 8-tap reconstructed]{
+   \includegraphics[width=0.25\textwidth] {lena_sym_reconstructed.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Symlet 8-tap diff]{
+   \includegraphics[width=0.25\textwidth] {lena_sym_diff.jpg}
+   \label{fig:subfig1}
+ }
+ 
+ \subfigure[Cohen 8-tap encoded]{
+   \includegraphics[width=0.25\textwidth] {lena_cohen_encoded.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+ \subfigure[Cohen 8-tap reconstructed]{
+   \includegraphics[width=0.25\textwidth] {lena_cohen_reconstructed.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Cohen 8-tap diff]{
+   \includegraphics[width=0.25\textwidth] {lena_cohen_diff.jpg}
+   \label{fig:subfig1}
+ }
+\end{figure*}
+
+
+
 
 \section{Assignment 8}
 
@@ -368,7 +655,62 @@ Opening and closing are just combinations of the operations above.
 
 Boundary following and hole filling is done using again the same algorithms of above, yet their runtime is very slow, so it is not recommended to run these by anybody again ( runtime is at least 30 mins ).
 
+\begin{figure*}[h!]
+    \centering
+  \subfigure[Noisy fingerprint erosion]{
+   \includegraphics[width=0.25\textwidth] {noisy_fingerprint_erosion.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Noisy fingerprint dilation]{
+   \includegraphics[width=0.25\textwidth] {noisy_fingerprint_diletation.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Noisy fingerprint opening]{
+   \includegraphics[width=0.25\textwidth] {noisy_fingerprint_opening.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Noisy fingerprint closing]{
+   \includegraphics[width=0.25\textwidth] {noisy_fingerprint_closing.jpg}
+   \label{fig:subfig1}
+ }
+ 
+\end{figure*}
+
+\begin{figure*}[h!]
+    \centering
+  \subfigure[Lincoln Boundary extraction]{
+   \includegraphics[width=0.25\textwidth] {licoln_from_penny_boundaryextraction.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Hole filling with 3x3 mask]{
+   \includegraphics[width=0.25\textwidth] {region_filling_holesfilled.jpg}
+   \label{fig:subfig1}
+ } 
+\end{figure*}
+
+
 \section{Assignment 9}
+
+\subsection{Segementation}
+
+\begin{figure*}[h!]
+    \centering
+  \subfigure[Global thresholding, beginning with datamean and datamean +20]{
+   \includegraphics[width=0.25\textwidth] {global.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Thresholding using Otsu algorithm]{
+   \includegraphics[width=0.25\textwidth] {Otsu.jpg}
+   \label{fig:subfig1}
+ } 
+\end{figure*}
+
+
 
 \subsection{Edgedetection}
 
@@ -474,6 +816,35 @@ for i in range(1, width - 1):
 After traversing the items, the edge linking is done and the array is returned, which contains the picture of the canny edge detection.
 
 
+\begin{figure*}[h!]
+    \centering
+  \subfigure[Roberts edge detector]{
+   \includegraphics[width=0.25\textwidth] {roberts.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Sobel of image]{
+   \includegraphics[width=0.25\textwidth] {sobel.jpg}
+   \label{fig:subfig1}
+ } 
+ ~
+  \subfigure[Prewitt of image]{
+   \includegraphics[width=0.25\textwidth] {prewitt.jpg}
+   \label{fig:subfig1}
+ } 
+ ~
+  \subfigure[Maar hidlret of image]{
+   \includegraphics[width=0.25\textwidth] {marr_hidlret.jpg}
+   \label{fig:subfig1}
+ } 
+ ~
+  \subfigure[Canny edge detector]{
+   \includegraphics[width=0.25\textwidth] {canny.jpg}
+   \label{fig:subfig1}
+ } 
+\end{figure*}
+
+
 \section{Assignment 10}
 
 The last Assignment is about using boundary following to extract chain codes and using PCA for compression.
@@ -533,8 +904,94 @@ s = (b - ( c_i - c_{i+1} )) \mod b
 \end{gather*}
 Which gives us the correct results, using the modulo operator as "mod"
 
+
+\begin{figure*}[h!]
+    \centering
+  \subfigure[Followed boundary after applying blur on image]{
+   \includegraphics[width=0.25\textwidth] {boundary_followed.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Followed boundary after applying blur on image]{
+   \includegraphics[width=0.25\textwidth] {grid.jpg}
+   \label{fig:subfig1}
+ }
+\end{figure*}
+
+The chaincodes can be seen in the file "Chaincode".
+
 \subsection{PCA} 
 Principal component analysis (PCA) is a statistical procedure that uses an orthogonal transformation to convert a set of observations of possibly correlated variables into a set of values of linearly uncorrelated variables called principal components. The number of principal components is less than or equal to the number of original variables. This transformation is defined in such a way that the first principal component has the largest possible variance (that is, accounts for as much of the variability in the data as possible), and each succeeding component in turn has the highest variance possible under the constraint that it is orthogonal to (i.e., uncorrelated with) the preceding components. The principal components are orthogonal because they are the eigenvectors of the covariance matrix, which is symmetric. PCA is sensitive to the relative scaling of the original variables.
 
 The results of the PCA compression can be seen in the Assignment 10 folder.
 
+\begin{figure*}[h!]
+    \centering
+  \subfigure[First PC component]{
+   \includegraphics[width=0.25\textwidth] {PC_Component_1.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+  \subfigure[Second PC component]{
+   \includegraphics[width=0.25\textwidth] {PC_Component_2.jpg}
+   \label{fig:subfig1}
+ } 
+ 
+  \subfigure[First component reconstructed]{
+   \includegraphics[width=0.25\textwidth] {Reconstructed_1.jpg}
+   \label{fig:subfig1}
+ } 
+ ~
+  \subfigure[Second component reconstructed]{
+   \includegraphics[width=0.25\textwidth] {Reconstructed_2.jpg}
+   \label{fig:subfig1}
+ } 
+ ~
+  \subfigure[3rd component reconstructed]{
+   \includegraphics[width=0.25\textwidth] {Reconstructed_3.jpg}
+   \label{fig:subfig1}
+ } 
+   \subfigure[4th component reconstructed]{
+   \includegraphics[width=0.25\textwidth] {Reconstructed_4.jpg}
+   \label{fig:subfig1}
+ } 
+ ~
+  \subfigure[5th component reconstructed]{
+   \includegraphics[width=0.25\textwidth] {Reconstructed_5.jpg}
+   \label{fig:subfig1}
+ } 
+   \subfigure[6th component reconstructed]{
+   \includegraphics[width=0.25\textwidth] {Reconstructed_6.jpg}
+   \label{fig:subfig1}
+ } 
+ 
+  \subfigure[Diff 1st component]{
+   \includegraphics[width=0.25\textwidth] {Diff_1.jpg}
+   \label{fig:subfig1}
+ } 
+ ~
+ \subfigure[Diff 2nd component]{
+   \includegraphics[width=0.25\textwidth] {Diff_2.jpg}
+   \label{fig:subfig1}
+ }
+ ~
+ \subfigure[Diff 3rd component]{
+   \includegraphics[width=0.25\textwidth] {Diff_3.jpg}
+   \label{fig:subfig1}
+ } 
+ ~
+ \subfigure[Diff 4th component]{
+   \includegraphics[width=0.25\textwidth] {Diff_4.jpg}
+   \label{fig:subfig1}
+ } 
+ ~
+ \subfigure[Diff 5th component]{
+   \includegraphics[width=0.25\textwidth] {Diff_5.jpg}
+   \label{fig:subfig1}
+ } 
+ ~
+ \subfigure[Diff 6th component]{
+   \includegraphics[width=0.25\textwidth] {Diff_6.jpg}
+   \label{fig:subfig1}
+ }  
+\end{figure*}

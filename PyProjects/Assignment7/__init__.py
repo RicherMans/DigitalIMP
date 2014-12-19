@@ -5,11 +5,11 @@ import argparse
 from scipy import misc, fftpack
 from scipy.fftpack import dct
 import cmath
-import np as np
+import numpy as np
 from matplotlib import pyplot
 import scipy
 from scipy.linalg import block_diag
-from np import vstack
+from numpy import vstack
 from scipy import signal
 
 jpegstd = np.array([[16, 11, 10, 16, 24, 40, 51, 61],
@@ -108,7 +108,6 @@ def daubechieskernel(inputimage):
     h0 = g0_daub[::-1]
     g1 = [h0[i] * np.power(-1., i) for i in range(len(g0_daub))]
     h1 = g1[::-1]
-    # return ((h0, h1), (g0_daub, g1))
     fwd = np.zeros((inputimage.shape))
     # We initizlize the matrix as having a stacked diagonal
     # Using two different submatrices, where the lower and the upper part are
@@ -185,7 +184,6 @@ def decode(encodedimgs, rowlength):
     inverseimgs = inversetransform(encodedimgs)
     mergedimg = mergesubimages(inverseimgs, rowlength)
     return mergedimg
-#     return readjustrange(mergedimg)
 
 
 def mergesubimages(subimages, rowlength):
@@ -201,7 +199,6 @@ def mergesubimages(subimages, rowlength):
                     b = i * len(subimg[0]) + p
                     ret[a, b] = subimg[q, p]
     return ret
-#     return subimages.reshape((512,512))
 
 
 def inversetransform(encodedimgs):

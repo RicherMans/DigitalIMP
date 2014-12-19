@@ -7,10 +7,10 @@
 \usepackage{amsmath, amsfonts, amssymb}
 \usepackage{multirow}
 \usepackage{fancyvrb}
-\usepackage{subfig}
+\usepackage{subfigure}
 \usepackage{minted}
 \usepackage{CJKutf8}
-\captionsetup[subfigure]{labelformat=empty}
+%\captionsetup[subfigure]{labelformat=empty}
 \usepackage[unicode]{hyperref}
 \usepackage{indentfirst}
 \usepackage{listings}
@@ -24,6 +24,15 @@
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
 \definecolor{codepurple}{rgb}{0.58,0,0.82}
 \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\usepackage{alphalph}
+\usepackage{bigfoot}
+\DeclareNewFootnote[para]{B}[alph]
+\DeclareNewFootnote{default}
+
+\usepackage{perpage}
+\MakePerPage{footnoteB}
+\usepackage{alphalph}
+\renewcommand{\thesubfigure}{(\emph{\alphalph{\value{subfigure}}})}
 
 \lstdefinestyle{codestyle}{
 %    backgroundcolor=\color{backcolour},  
@@ -71,7 +80,9 @@ E-mail: {\tt heinrich.dinkel@sjtu.edu.cn}\\
 
 \end{center}
 
-\graphicspath{ {../images/} }
+\graphicspath{ {../images/}{../Assignment2/}{../Assignment3/}{../Assignment4/}{../Assignment5/}{../Assignment6/}{../Assignment7/}     {../Assignment8/}{../Assignment9/}{../Assignment10/}   }
+
+
 \newcommand{\ppath}{.}
 
 \input{\ppath/tech}

@@ -3,7 +3,6 @@ Created on Nov 19, 2014
 
 @author: richman
 '''
-from PIL import Image
 import argparse
 from scipy import misc
 import numpy as np
@@ -121,11 +120,11 @@ class NearestNeighbor():
         y_ratio = oh / float(dh)
         
         px, py = np.meshgrid(np.arange(dw), np.arange(dh))
-# Shrinkage
+        # Shrinkage
         if x_ratio >= 1:
             sx, sy = self._interpolate(px * x_ratio, py * y_ratio)
             mask = (0 <= sx) & (0 < dw) & (0 <= sy) & (0 < dh)
-#             Upscaling
+        # Upscaling
         else:
             sx, sy = self._interpolate(px * x_ratio, py * y_ratio)
             mask = (0 <= sx) & (sx < dw) & (0 <= sy) & (sy < dh)

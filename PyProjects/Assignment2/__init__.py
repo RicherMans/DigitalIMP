@@ -1,37 +1,38 @@
 from argparse import ArgumentParser
 import numpy as np
 from scipy import misc
+from Assignment4 import shape
 
 
 def main():
     args = parseArgs()
     inputimage = misc.imread(args.inputimage)
-    laplacian_mask = np.array([[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]])
+    laplacian_mask = np.array([[-1, -1, -1], [-1, 8+args.a, -1], [-1, -1, -1]])
     laplacian_img = transform(inputimage, laplacian_mask)
     writeimage(laplacian_img, 'Laplacian_' + args.o)
     sharpenedimg = laplacian_img + inputimage
     writeimage(sharpenedimg, 'Sharpened_' + args.o)
     sobelimg = transformsobel(inputimage)
     writeimage(sobelimg, 'Sobel_' + args.o)
-    smoothedimg = transform(sobelimg, np.ones((5, 5)))
+    smoothedimg = transform(sobelimg, np.ones((5, 5)),True)
     writeimage(smoothedimg, 'smooth_' + args.o)
-    maskedimg = smoothedimg * sharpenedimg
+    maskedimg = scale(smoothedimg * laplacian_img)
     writeimage(maskedimg, 'maskedimg_' + args.o)
-    finalsharpimg = powerlaw(maskedimg + inputimage, 2)
+    finalsharpimg = powerlaw(maskedimg + inputimage, 0.5)
     writeimage(finalsharpimg, 'final_' + args.o)
 
 
+def scale(arr):
+    min_val = np.min(arr)
+    scaled = arr-min_val
+    scaled[scaled <=np.finfo(np.float32).eps] = 0.
+    max_value= np.max(scaled)
+    if max_value != 0. : scaled= scaled*(255./max_value)
+    return scaled
+
 def powerlaw(inputimg, gamma):
     # normalize(inputimg)
-    return inputimg
-    return 0.01 * np.power(inputimg, gamma)
-
-
-def normalize(arr):
-    for i in range(len(arr)):
-        normalizer = max(arr[i])
-        for j in range(len(arr[0])):
-            arr[i][j] = arr[i][j] / normalizer * 255
+    return scale(1 * np.power(inputimg, gamma))
 
 
 def writeimage(binaryimage, outpath):
@@ -42,12 +43,12 @@ def transformsobel(arr):
     def sobel():
         return (np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]]), np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]]))
     xkernl, ykernl = sobel()
-    gx = transform(arr, xkernl)
-    gy = transform(arr, ykernl)
-    return np.hypot(gx, gy)
+    gx = transform(arr, xkernl,False)
+    gy = transform(arr, ykernl,False)
+    return scale(np.hypot(gx, gy))
 
 
-def transform(arr, mask):
+def transform(arr, mask,doscale=True):
     transformedimg = np.array(arr, dtype=int)
     for i in range(len(arr)):
         for j in range(len(arr[0])):
@@ -57,7 +58,10 @@ def transform(arr, mask):
                     weightedavg += arr[(i +
                                         (p - 1)) % len(arr)][(j + (q - 1)) % len(arr[0])] * mask[p][q]
             transformedimg[i][j] = weightedavg
-    return transformedimg
+    if doscale:
+        return scale(transformedimg)
+    else:
+        return transformedimg
 
 
 def parseArgs():

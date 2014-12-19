@@ -1,10 +1,10 @@
 from argparse import ArgumentParser
 from scipy import misc
 import cmath
-import np as np
+import numpy as np
 import math
 from matplotlib import pyplot as plt
-from np import real, convolve
+from numpy import real, convolve
 import scipy
 
 
