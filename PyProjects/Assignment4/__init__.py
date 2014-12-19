@@ -59,8 +59,8 @@ def filterImgWriteOut(args,img):
 
 
 def writeImg(img,noisetype,filtertype):
-    misc.imsave(noisetype+'_'+filtertype+'.tif', img)    
-    print "Wrote %s "%(noisetype+'_'+filtertype+'.tif')
+    misc.imsave(noisetype+'_'+filtertype+'.jpg', img)    
+    print "Wrote %s "%(noisetype+'_'+filtertype+'.jpg')
     
 def transform(noise,imagearr):
     if noise == 'gaussian':
@@ -106,7 +106,7 @@ def geometricMeanFilter(arr,shape=(3,3)):
     transformedimg = np.copy(arr)
     for i in range(xoff,len(arr)-xoff):
         for j in range(yoff,len(arr[0])-yoff):
-            average = 0
+            average = 1.
             for p in range(x):
                 for q in range(y):
                     average *= arr[i+(p-xoff)][j+(q-yoff)]
